@@ -1,0 +1,12 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"

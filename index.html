@@ -554,6 +554,13 @@ body.light-mode .match-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
       <div class="sidebar-title">Tabla de posiciones</div>
       <div id="standings-mini"></div>
     </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Herramientas</div>
+      <div class="league-item" id="bankroll-nav" onclick="showBankroll()" style="cursor:pointer">
+        <span class="league-flag">💰</span>
+        <div><div class="league-name">Simulador Bankroll</div><div class="league-country">Monte Carlo</div></div>
+      </div>
+    </div>
   </aside>
 
   <div class="main-content">
@@ -594,6 +601,100 @@ body.light-mode .match-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
         <div id="accuracy-detail-body"></div>
       </div>
     </div>
+    <!-- ── Bankroll Simulator Panel ── -->
+    <div id="bankroll-panel" style="display:none;padding:24px;max-width:1000px;margin:0 auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-.5px">💰 Simulador de Bankroll</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">Monte Carlo · hasta 100 simulaciones simultáneas</div>
+        </div>
+        <button onclick="hideBankroll()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;padding:7px 14px;border-radius:10px;font-family:inherit">← Volver</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start">
+        <!-- Formulario -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3)">Parámetros</div>
+
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text2);font-weight:600">
+            Bankroll inicial (€)
+            <input id="bk-init" type="number" value="5000" min="100" step="100"
+              style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;outline:none">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text2);font-weight:600">
+            Cuota promedio (decimal)
+            <input id="bk-odds" type="number" value="2.10" min="1.01" step="0.05"
+              style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;outline:none">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text2);font-weight:600">
+            Tasa de acierto (%)
+            <input id="bk-wr" type="number" value="55" min="1" max="99" step="0.5"
+              style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;outline:none">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text2);font-weight:600">
+            Apuesta por operación (% bankroll)
+            <input id="bk-bet" type="number" value="2" min="0.1" max="50" step="0.5"
+              style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;outline:none">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text2);font-weight:600">
+            Número de apuestas
+            <input id="bk-nbets" type="number" value="500" min="10" max="5000" step="10"
+              style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;outline:none">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text2);font-weight:600">
+            Simulaciones
+            <input id="bk-nsims" type="number" value="20" min="5" max="100" step="5"
+              style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;outline:none">
+          </label>
+
+          <button onclick="runBankrollSim()" style="margin-top:4px;background:linear-gradient(135deg,#3d75e3,#2563eb);border:none;color:#fff;font-size:13px;font-weight:800;cursor:pointer;padding:11px;border-radius:10px;font-family:inherit;letter-spacing:.3px">
+            ▶ Ejecutar simulación
+          </button>
+
+          <!-- Resultados -->
+          <div id="bk-results" style="display:none;border-top:1px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3)">Resultados</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="background:var(--surface2);border-radius:10px;padding:10px">
+                <div style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.8px">Bankroll final med.</div>
+                <div id="bk-res-median" style="font-size:16px;font-weight:900;color:var(--accent);margin-top:2px">-</div>
+              </div>
+              <div style="background:var(--surface2);border-radius:10px;padding:10px">
+                <div style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.8px">ROI total med.</div>
+                <div id="bk-res-roi" style="font-size:16px;font-weight:900;margin-top:2px">-</div>
+              </div>
+              <div style="background:var(--surface2);border-radius:10px;padding:10px">
+                <div style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.8px">Riesgo ruina</div>
+                <div id="bk-res-ruin" style="font-size:16px;font-weight:900;margin-top:2px">-</div>
+              </div>
+              <div style="background:var(--surface2);border-radius:10px;padding:10px">
+                <div style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.8px">EV por apuesta</div>
+                <div id="bk-res-ev" style="font-size:16px;font-weight:900;margin-top:2px">-</div>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border-radius:10px;padding:10px">
+              <div style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Percentiles bankroll final</div>
+              <div style="display:flex;justify-content:space-between">
+                <div style="text-align:center"><div style="font-size:9px;color:var(--text3)">P10</div><div id="bk-p10" style="font-size:12px;font-weight:800;color:#f87171">-</div></div>
+                <div style="text-align:center"><div style="font-size:9px;color:var(--text3)">P50</div><div id="bk-p50" style="font-size:12px;font-weight:800;color:var(--text)">-</div></div>
+                <div style="text-align:center"><div style="font-size:9px;color:var(--text3)">P90</div><div id="bk-p90" style="font-size:12px;font-weight:800;color:#51c469">-</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas chart -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px">
+          <div style="font-size:13px;font-weight:800;margin-bottom:14px" id="bk-chart-title">Evolución del bankroll</div>
+          <canvas id="bk-canvas" width="660" height="400" style="width:100%;height:auto;display:block;border-radius:8px"></canvas>
+          <div id="bk-chart-empty" style="height:400px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--text3)">
+            <div style="font-size:36px">📊</div>
+            <div style="font-size:13px;font-weight:600">Configurá los parámetros y ejecutá la simulación</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="matches-container" id="matches-container">
       <div class="empty-state">
         <div class="empty-icon">🧠</div>
@@ -1114,16 +1215,25 @@ async function loadAll(){
   finishedLoaded=false;
   clearTimeout(refreshTimer);showSpinner();
   try{
-    // Single call: all upcoming + live (avoids rate limit)
     const mData=await apiGet(`/competitions/${currentLeague}/matches?status=SCHEDULED,TIMED,IN_PLAY,PAUSED`);
     allMatches=mData?.matches||[];
     globalMatchCache[currentLeague]=allMatches;
-    // Load standings separately (1 extra call)
     try{
       const sData=await apiGet(`/competitions/${currentLeague}/standings`);
       const table=sData?.standings?.[0]?.table||[];
       standings[currentLeague]=table;renderStandings(table);
     }catch{}
+    // Si no hay próximos, cargar finalizados automáticamente
+    if(allMatches.length===0){
+      const fData=await apiGet(`/competitions/${currentLeague}/matches?status=FINISHED&limit=30`);
+      allMatches=fData?.matches||[];
+      globalMatchCache[currentLeague]=allMatches;
+      finishedLoaded=true;
+      // Activar chip Finalizados
+      document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+      const fc=document.querySelector('.chip[data-f="FINISHED"]');
+      if(fc){fc.classList.add('active');currentFilter='FINISHED';}
+    }
     renderMatches();
     renderAccuracy();
     generateAutoTips();
@@ -2818,6 +2928,197 @@ async function fbotAsk(question){
     if(el)el.innerHTML=`<span style="color:var(--red)">⚠️ Backend no disponible — arrancá python3 api.py</span>`;
   }
   msgs.scrollTop=msgs.scrollHeight;
+}
+
+/* ════════════════════════════════════════
+   💰 BANKROLL SIMULATOR — Monte Carlo
+   ════════════════════════════════════════ */
+function showBankroll(){
+  document.getElementById('bankroll-panel').style.display='block';
+  document.getElementById('matches-container').style.display='none';
+  document.getElementById('content-title').textContent='Simulador de Bankroll';
+  document.querySelectorAll('.league-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('bankroll-nav').classList.add('active');
+}
+function hideBankroll(){
+  document.getElementById('bankroll-panel').style.display='none';
+  document.getElementById('matches-container').style.display='';
+  document.getElementById('content-title').textContent=LEAGUE_NAMES[currentLeague]||currentLeague;
+  document.querySelectorAll('.league-item').forEach(x=>x.classList.remove('active'));
+  document.querySelector(`.league-item[data-code="${currentLeague}"]`)?.classList.add('active');
+}
+
+function runBankrollSim(){
+  const init  = parseFloat(document.getElementById('bk-init').value)||5000;
+  const odds  = parseFloat(document.getElementById('bk-odds').value)||2.10;
+  const wr    = parseFloat(document.getElementById('bk-wr').value)/100||0.55;
+  const betPct= parseFloat(document.getElementById('bk-bet').value)/100||0.02;
+  const nBets = parseInt(document.getElementById('bk-nbets').value)||500;
+  const nSims = Math.min(parseInt(document.getElementById('bk-nsims').value)||20, 100);
+  const ev    = wr*(odds-1)-(1-wr);
+
+  // Correr simulaciones
+  const paths=[];
+  for(let s=0;s<nSims;s++){
+    const path=[init];
+    let bk=init;
+    for(let i=0;i<nBets;i++){
+      if(bk<=0){path.push(0);continue;}
+      const bet=bk*betPct;
+      bk = Math.random()<wr ? bk+bet*(odds-1) : bk-bet;
+      path.push(Math.max(0,bk));
+    }
+    paths.push(path);
+  }
+
+  // Estadísticas finales
+  const finals=paths.map(p=>p[p.length-1]).sort((a,b)=>a-b);
+  const median=finals[Math.floor(nSims/2)];
+  const p10=finals[Math.floor(nSims*0.1)];
+  const p90=finals[Math.floor(nSims*0.9)];
+  const ruinPct=finals.filter(f=>f<init*0.1).length/nSims*100;
+  const roi=(median-init)/init*100;
+
+  // Mostrar resultados
+  const res=document.getElementById('bk-results');
+  res.style.display='flex';
+  const fmt=v=>`€${v>=10000?Math.round(v/1000)+'K':Math.round(v).toLocaleString('es')}`;
+  document.getElementById('bk-res-median').textContent=fmt(median);
+  document.getElementById('bk-res-roi').style.color=roi>=0?'#51c469':'#f87171';
+  document.getElementById('bk-res-roi').textContent=(roi>=0?'+':'')+roi.toFixed(1)+'%';
+  document.getElementById('bk-res-ruin').style.color=ruinPct>20?'#f87171':ruinPct>5?'#f59e0b':'#51c469';
+  document.getElementById('bk-res-ruin').textContent=ruinPct.toFixed(1)+'%';
+  document.getElementById('bk-res-ev').style.color=ev>0?'#51c469':'#f87171';
+  document.getElementById('bk-res-ev').textContent=(ev>=0?'+':'')+( ev*100).toFixed(2)+'%';
+  document.getElementById('bk-p10').textContent=fmt(p10);
+  document.getElementById('bk-p50').textContent=fmt(median);
+  document.getElementById('bk-p90').textContent=fmt(p90);
+  const title=`Evolución del bankroll (${nSims} simulaciones) · EV ${ev>=0?'+':''}${(ev*100).toFixed(2)}% por apuesta`;
+  document.getElementById('bk-chart-title').textContent=title;
+
+  drawBankrollChart(paths, init, nBets, p10, median, p90);
+}
+
+function drawBankrollChart(paths, init, nBets, p10, median, p90){
+  const canvas=document.getElementById('bk-canvas');
+  const empty=document.getElementById('bk-chart-empty');
+  canvas.style.display='block';
+  empty.style.display='none';
+
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.offsetWidth||660, H=Math.round(W*0.58)||400;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  const PAD={top:16,right:20,bottom:42,left:70};
+  const cW=W-PAD.left-PAD.right, cH=H-PAD.top-PAD.bottom;
+
+  // Fondo
+  const isDark=!document.body.classList.contains('light-mode');
+  ctx.fillStyle=isDark?'#1e2336':'#ffffff';
+  ctx.fillRect(0,0,W,H);
+
+  // Rango Y
+  const allVals=paths.flat();
+  const yMin=Math.min(...allVals)*0.95;
+  const yMax=Math.max(...allVals)*1.05;
+  const xScale=i=>PAD.left+i/paths[0].length*cW;
+  const yScale=v=>PAD.top+cH-(v-yMin)/(yMax-yMin)*cH;
+
+  // Grid
+  ctx.strokeStyle=isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.07)';
+  ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const y=PAD.top+i*cH/5;
+    ctx.beginPath();ctx.moveTo(PAD.left,y);ctx.lineTo(PAD.left+cW,y);ctx.stroke();
+  }
+
+  // Línea inicial (bankroll base)
+  ctx.strokeStyle=isDark?'rgba(255,255,255,.15)':'rgba(0,0,0,.15)';
+  ctx.setLineDash([4,4]);
+  const yInitLine=yScale(init);
+  ctx.beginPath();ctx.moveTo(PAD.left,yInitLine);ctx.lineTo(PAD.left+cW,yInitLine);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Banda P10-P90 (paso a paso)
+  const steps=paths[0].length;
+  const sortedByStep=[];
+  for(let i=0;i<steps;i++){
+    const vals=paths.map(p=>p[i]).sort((a,b)=>a-b);
+    sortedByStep.push(vals);
+  }
+  ctx.beginPath();
+  for(let i=0;i<steps;i++){
+    const vals=sortedByStep[i];
+    const lo=vals[Math.floor(vals.length*0.1)];
+    const x=xScale(i), y=yScale(lo);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  for(let i=steps-1;i>=0;i--){
+    const vals=sortedByStep[i];
+    const hi=vals[Math.floor(vals.length*0.9)];
+    ctx.lineTo(xScale(i),yScale(hi));
+  }
+  ctx.closePath();
+  ctx.fillStyle=isDark?'rgba(61,117,227,.12)':'rgba(61,117,227,.10)';
+  ctx.fill();
+
+  // Líneas individuales
+  const colors=['#3d75e3','#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#eab308','#22c55e','#14b8a6','#06b6d4'];
+  paths.forEach((path,si)=>{
+    ctx.beginPath();
+    path.forEach((v,i)=>{
+      const x=xScale(i),y=yScale(v);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle=(colors[si%colors.length])+(isDark?'55':'44');
+    ctx.lineWidth=1;
+    ctx.stroke();
+  });
+
+  // Línea media
+  const meanPath=paths[0].map((_,i)=>paths.reduce((s,p)=>s+p[i],0)/paths.length);
+  ctx.beginPath();
+  meanPath.forEach((v,i)=>{
+    const x=xScale(i),y=yScale(v);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='#1d4ed8';
+  ctx.lineWidth=2.5;
+  ctx.stroke();
+
+  // Ejes
+  const textColor=isDark?'rgba(255,255,255,.5)':'rgba(0,0,0,.5)';
+  ctx.fillStyle=textColor;
+  ctx.font=`600 10px system-ui`;
+  ctx.textAlign='right';
+  for(let i=0;i<=5;i++){
+    const v=yMin+(yMax-yMin)*(1-i/5);
+    const y=PAD.top+i*cH/5;
+    const label=v>=10000?`€${(v/1000).toFixed(0)}K`:`€${Math.round(v)}`;
+    ctx.fillText(label,PAD.left-6,y+4);
+  }
+  ctx.textAlign='center';
+  const xTicks=Math.min(6,nBets);
+  for(let i=0;i<=xTicks;i++){
+    const idx=Math.round(i/xTicks*nBets);
+    const x=xScale(idx);
+    ctx.fillText(idx,x,PAD.top+cH+16);
+  }
+  ctx.fillStyle=isDark?'rgba(255,255,255,.3)':'rgba(0,0,0,.3)';
+  ctx.font='600 10px system-ui';
+  ctx.textAlign='center';
+  ctx.fillText('Número de apuestas',PAD.left+cW/2,H-4);
+
+  // Leyenda
+  ctx.fillStyle='#1d4ed8';ctx.fillRect(PAD.left,PAD.top-4,16,3);
+  ctx.fillStyle=textColor;ctx.font='600 10px system-ui';ctx.textAlign='left';
+  ctx.fillText('Media',PAD.left+20,PAD.top+3);
+  ctx.fillStyle=isDark?'rgba(61,117,227,.35)':'rgba(61,117,227,.25)';
+  ctx.fillRect(PAD.left+70,PAD.top-8,12,12);
+  ctx.fillStyle=textColor;ctx.fillText('P10–P90',PAD.left+86,PAD.top+3);
 }
 </script>
 </body>

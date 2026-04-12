@@ -259,6 +259,7 @@ class ChatRequest(BaseModel):
     question: str
     context: str
     api_key: str = ""
+    system: str = ""  # custom system prompt from frontend (includes memory instructions)
 
 @app.post("/chat")
 def chat(req: ChatRequest):
@@ -269,10 +270,14 @@ def chat(req: ChatRequest):
         return {"error": "Necesitás una API key de Anthropic. Creá una gratis en console.anthropic.com y pegala en el campo 'IA:' del dashboard."}
     try:
         client = _anthropic.Anthropic(api_key=key)
+        system_prompt = req.system if req.system else (
+            "Sos un analista de fútbol experto. Respondés en español rioplatense, "
+            "de forma directa y concisa. Tomás posición clara basándote en los datos."
+        )
         msg = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=500,
-            system="Sos un analista de fútbol experto. Respondés en español rioplatense, de forma directa y concisa (máximo 200 palabras). Tomás posición clara basándote en los datos del partido. No sos genérico.",
+            max_tokens=700,
+            system=system_prompt,
             messages=[{"role": "user", "content": f"Datos del partido:\n{req.context}\n\nPregunta: {req.question}"}]
         )
         return {"text": msg.content[0].text}

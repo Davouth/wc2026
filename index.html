@@ -2858,73 +2858,176 @@ function sendFreeChat(matchId){
   askAI(matchId,q);
 }
 
+/* ════════════════════════════════════════
+   🧠 TEAM MEMORY — aprendizaje persistente
+   ════════════════════════════════════════ */
+const TM_KEY='sb_team_memory_v2';
+
+function tmGet(){try{return JSON.parse(localStorage.getItem(TM_KEY)||'{}')}catch{return{}}}
+function tmSave(m){localStorage.setItem(TM_KEY,JSON.stringify(m))}
+
+function tmAddInsight(teamId,teamName,insight,matchDesc){
+  if(!teamId||!insight||insight.length<10)return;
+  const m=tmGet();
+  if(!m[teamId])m[teamId]={name:teamName,insights:[],absences:[],style:'',lastSeen:''};
+  m[teamId].name=teamName;
+  m[teamId].lastSeen=new Date().toISOString().slice(0,10);
+  m[teamId].insights.unshift({date:new Date().toISOString().slice(0,10),match:matchDesc||'',text:insight.slice(0,400)});
+  m[teamId].insights=m[teamId].insights.slice(0,12); // keep last 12
+  tmSave(m);
+}
+
+function tmSetStyle(teamId,teamName,style){
+  if(!teamId||!style)return;
+  const m=tmGet();
+  if(!m[teamId])m[teamId]={name:teamName,insights:[],absences:[],style:'',lastSeen:''};
+  m[teamId].style=style;
+  tmSave(m);
+}
+
+function tmSetAbsences(teamId,teamName,absences){
+  if(!teamId)return;
+  const m=tmGet();
+  if(!m[teamId])m[teamId]={name:teamName,insights:[],absences:[],style:'',lastSeen:''};
+  m[teamId].absences=absences||[];
+  tmSave(m);
+}
+
+function tmGetContext(teamId,teamName){
+  const m=tmGet();
+  const d=m[teamId];
+  if(!d||!d.insights?.length)return null;
+  const lines=[];
+  if(d.style)lines.push(`Estilo conocido: ${d.style}`);
+  if(d.absences?.length)lines.push(`Bajas recientes: ${d.absences.join(', ')}`);
+  const recent=d.insights.slice(0,3);
+  recent.forEach(i=>lines.push(`[${i.date}${i.match?' · '+i.match:''}] ${i.text}`));
+  return lines.join('\n');
+}
+
+function tmCount(){return Object.keys(tmGet()).length}
+
+function tmParseAndSave(aiText, homeId, homeName, awayId, awayName, matchDesc){
+  // Parse ---MEMORIA--- block from AI response
+  const memBlock=aiText.match(/---MEMORIA---([\s\S]*?)(?:---|$)/i);
+  if(!memBlock)return;
+  const lines=memBlock[1].split('\n').map(l=>l.trim()).filter(Boolean);
+  lines.forEach(line=>{
+    const homeMatch=line.match(new RegExp(`^${homeName}[:\\-\\s]+(.+)`,'i'));
+    const awayMatch=line.match(new RegExp(`^${awayName}[:\\-\\s]+(.+)`,'i'));
+    if(homeMatch)tmAddInsight(homeId,homeName,homeMatch[1],matchDesc);
+    if(awayMatch)tmAddInsight(awayId,awayName,awayMatch[1],matchDesc);
+    // Style detection
+    if(line.toLowerCase().includes('estilo')){
+      if(homeMatch)tmSetStyle(homeId,homeName,homeMatch[1]);
+      if(awayMatch)tmSetStyle(awayId,awayName,awayMatch[1]);
+    }
+    // Absence detection
+    const absH=line.match(new RegExp(`bajas? ${homeName}[:\\s]+(.+)`,'i'));
+    const absA=line.match(new RegExp(`bajas? ${awayName}[:\\s]+(.+)`,'i'));
+    if(absH)tmSetAbsences(homeId,homeName,absH[1].split(',').map(s=>s.trim()));
+    if(absA)tmSetAbsences(awayId,awayName,absA[1].split(',').map(s=>s.trim()));
+  });
+}
+
+function showTeamMemoryModal(teamId,teamName){
+  const m=tmGet();
+  const d=m[teamId];
+  if(!d||!d.insights?.length){
+    alert(`Sin memoria acumulada para ${teamName}.\nAnalizá partidos de este equipo con el bot para que aprenda.`);
+    return;
+  }
+  const html=`
+    <div style="position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)this.remove()">
+      <div style="width:min(520px,95vw);max-height:80vh;overflow-y:auto;background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:22px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="font-size:16px;font-weight:900">🧠 Memoria — ${teamName}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">${d.insights.length} análisis acumulados · último: ${d.lastSeen}</div>
+          </div>
+          <button onclick="this.closest('[style*=fixed]').remove()" style="background:var(--surface3);border:1px solid var(--border);color:var(--text2);font-size:13px;cursor:pointer;padding:5px 10px;border-radius:8px;font-family:inherit">✕</button>
+        </div>
+        ${d.style?`<div style="background:rgba(61,117,227,.1);border:1px solid rgba(61,117,227,.2);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px"><strong>Estilo:</strong> ${d.style}</div>`:''}
+        ${d.absences?.length?`<div style="background:rgba(246,110,110,.1);border:1px solid rgba(246,110,110,.2);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px"><strong>Bajas recientes:</strong> ${d.absences.join(', ')}</div>`:''}
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${d.insights.map(i=>`
+            <div style="background:var(--surface2);border-radius:10px;padding:10px 12px;border:1px solid var(--border)">
+              <div style="font-size:9px;color:var(--text3);margin-bottom:4px;font-weight:700">${i.date}${i.match?' · '+i.match:''}</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.5">${i.text}</div>
+            </div>`).join('')}
+        </div>
+        <button onclick="if(confirm('¿Borrar toda la memoria de ${teamName}?')){const m=tmGet();delete m[${teamId}];tmSave(m);this.closest('[style*=fixed]').remove();}" style="margin-top:14px;width:100%;background:transparent;border:1px solid rgba(246,110,110,.3);color:var(--red);font-size:11px;font-weight:700;cursor:pointer;padding:8px;border-radius:8px;font-family:inherit">🗑 Borrar memoria de ${teamName}</button>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
 async function askAI(matchId,question){
   const ctx=matchContextCache[matchId];
   if(!ctx){alert('Primero expandí el partido para cargar los datos.');return;}
   const{match,pred,gis,mkts,weather,hf,af,hs,as_}=ctx;
+  const hId=match.homeTeam.id, aId=match.awayTeam.id;
   const hN=match.homeTeam.shortName||match.homeTeam.name;
   const aN=match.awayTeam.shortName||match.awayTeam.name;
   const isDone=match.status==='FINISHED';
   const isLive=match.status==='IN_PLAY'||match.status==='PAUSED';
   const statusStr=isDone?`Finalizado ${match.score.fullTime?.home}-${match.score.fullTime?.away}`:isLive?`En vivo ${match.score.fullTime?.home??0}-${match.score.fullTime?.away??0}`:'Próximo';
+  const matchDesc=`${hN} vs ${aN}`;
 
-  const systemPrompt=`Sos un analista de fútbol experto con profundo conocimiento estadístico y táctico. Analizás partidos con datos reales y das opiniones directas, concretas y útiles. Respondés siempre en español rioplatense, de forma concisa pero completa (máximo 200 palabras). Usás los datos del partido como base para tus análisis. No sos genérico — tomás posición clara cuando los datos lo justifican.`;
+  // ── Load team memory ──
+  const hMem=tmGetContext(hId,hN);
+  const aMem=tmGetContext(aId,aN);
+  const memSection=(hMem||aMem)?`
+MEMORIA ACUMULADA DEL BOT (aprendizaje de análisis anteriores):
+${hMem?`${hN}:\n${hMem}`:''}
+${aMem?`${aN}:\n${aMem}`:''}`.trim():'';
+
+  const systemPrompt=`Sos un analista de fútbol experto con profundo conocimiento estadístico y táctico. Analizás partidos con datos reales y das opiniones directas, concretas y útiles. Respondés siempre en español rioplatense, de forma concisa pero completa (máximo 220 palabras).
+
+IMPORTANTE: Al final de CADA respuesta agregá una sección así (no la omitas):
+---MEMORIA---
+${hN}: [insight específico sobre este equipo en 1 oración — tendencia táctica, patrón observado, jugadores clave, problema recurrente]
+${aN}: [insight específico sobre este equipo en 1 oración]
+Bajas ${hN}: [si mencionaste bajas, listarlas separadas por coma; si no, omitir línea]
+Bajas ${aN}: [igual]
+---`;
 
   const matchCtx=`PARTIDO: ${hN} vs ${aN}
 LIGA: ${LEAGUE_NAMES[currentLeague]||currentLeague}
 ESTADO: ${statusStr}
 FECHA: ${new Date(match.utcDate).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'})}
-ESTADIO: ${match.venue||'No disponible'}
 
-TABLA DE POSICIONES:
+TABLA:
 - ${hN}: #${hs?.position||'?'} · ${hs?.points||'?'} pts · GD ${hs?(hs.goalsFor-hs.goalsAgainst>=0?'+':'')+(hs.goalsFor-hs.goalsAgainst):'?'}
 - ${aN}: #${as_?.position||'?'} · ${as_?.points||'?'} pts · GD ${as_?(as_.goalsFor-as_.goalsAgainst>=0?'+':'')+(as_.goalsFor-as_.goalsAgainst):'?'}
 
-FORMA RECIENTE (últimos 5):
+FORMA (últimos 5):
 - ${hN}: ${hf.join('-')||'sin datos'} · Momentum ${gis.hMom}/100 (${gis.hTrend})
 - ${aN}: ${af.join('-')||'sin datos'} · Momentum ${gis.aMom}/100 (${gis.aTrend})
 
-ESTADÍSTICAS OFENSIVAS/DEFENSIVAS (por partido):
-- ${hN}: ${gis.hGpg.toFixed(1)} goles a favor · ${gis.hGcpg.toFixed(1)} en contra · estilo: ${gis.hStyle}
-- ${aN}: ${gis.aGpg.toFixed(1)} goles a favor · ${gis.aGcpg.toFixed(1)} en contra · estilo: ${gis.aStyle}
+ESTADÍSTICAS:
+- ${hN}: ${gis.hGpg.toFixed(1)} goles/PJ · ${gis.hGcpg.toFixed(1)} recibidos · ${gis.hStyle}
+- ${aN}: ${gis.aGpg.toFixed(1)} goles/PJ · ${gis.aGcpg.toFixed(1)} recibidos · ${gis.aStyle}
+${mkts.hRec.pg>=3?`\nLocal ${hN}: ${mkts.hRec.w}V/${mkts.hRec.d}E/${mkts.hRec.l}D · ${mkts.hRec.gpg.toFixed(1)} goles/PJ`:''}
+${mkts.aRec.pg>=3?`\nVisita ${aN}: ${mkts.aRec.w}V/${mkts.aRec.d}E/${mkts.aRec.l}D · ${mkts.aRec.gpg.toFixed(1)} goles/PJ`:''}
 
-${mkts.hRec.pg>=3?`RECORD LOCAL DE ${hN.toUpperCase()}: ${mkts.hRec.w}V/${mkts.hRec.d}E/${mkts.hRec.l}D en ${mkts.hRec.pg} partidos como local · ${mkts.hRec.gpg.toFixed(1)} goles/PJ · ${mkts.hRec.csPct}% clean sheets`:''}
-${mkts.aRec.pg>=3?`RECORD VISITANTE DE ${aN.toUpperCase()}: ${mkts.aRec.w}V/${mkts.aRec.d}E/${mkts.aRec.l}D en ${mkts.aRec.pg} partidos como visitante · ${mkts.aRec.gpg.toFixed(1)} goles/PJ · ${mkts.aRec.csPct}% clean sheets`:''}
+MODELO: ${hN} ${pred.pH}% · Empate ${pred.pD}% · ${aN} ${pred.pA}%
+xG: ${mkts.expH} vs ${mkts.expA} · BTTS ${mkts.bttsProb}% · Over 2.5 ${mkts.over25Prob}% · Score probable ${mkts.topScoreStr} (${mkts.topScoreProb}%)
+${weather?`\nCLIMA: ${weather.temp}°C · ${weather.desc} · Viento ${weather.wind}km/h`:''}
+${memSection?'\n'+memSection:''}`.trim();
 
-PREDICCIÓN DEL MODELO:
-- Local ${pred.pH}% · Empate ${pred.pD}% · Visitante ${pred.pA}%
-- Resultado más favorecido: ${pred.outcome}
-
-MERCADOS (probabilidades del modelo):
-- BTTS: ${mkts.bttsProb}% · Over 1.5: ${mkts.over15Prob}% · Over 2.5: ${mkts.over25Prob}% · Over 3.5: ${mkts.over35Prob}%
-- xG esperado: ${hN} ${mkts.expH} — ${aN} ${mkts.expA}
-- Clean Sheet ${hN}: ${mkts.csHomeProb}% · Clean Sheet ${aN}: ${mkts.csAwayProb}%
-- Marcador más probable (Poisson): ${mkts.topScoreStr} (${mkts.topScoreProb}%)
-- Doble oportunidad: 1X ${mkts.dc1X}% · X2 ${mkts.dcX2}% · 12 ${mkts.dc12}%
-${mkts.handicap?`- Hándicap: ${mkts.handicapTeam} ${mkts.handicap}`:''}
-- Veredicto del modelo: ${mkts.verdictMarket}
-
-${weather?`CLIMA EN ${match.venue?.split(',')[0]||'la ciudad'}:
-- ${weather.temp}°C (sensación ${weather.feels}°C) · ${weather.desc}
-- Viento: ${weather.wind} km/h · Lluvia: ${weather.precip} mm · Humedad: ${weather.humidity}%`:'CLIMA: sin datos disponibles'}
-
-ÍNDICES:
-- Confianza: ${hN} ${gis.hConf}/100 · ${aN} ${gis.aConf}/100
-- Desgaste: ${hN} ${gis.hFat}/100 · ${aN} ${gis.aFat}/100`.trim();
-
-  // Mostrar en el chat
+  // UI
   const msgs=document.getElementById(`chat-msgs-${matchId}`)||document.querySelector(`#md-${matchId} .chat-messages`);
   if(!msgs)return;
-
   const userDiv=document.createElement('div');
   userDiv.className='chat-entry';
   userDiv.innerHTML=`<div class="chat-q-label">— ${question}</div>`;
   msgs.appendChild(userDiv);
-
   const respId=`ai-r-${matchId}-${Date.now()}`;
   const aiDiv=document.createElement('div');
   aiDiv.className='chat-entry';
-  aiDiv.innerHTML=`<div class="chat-bubble ai-bubble" id="${respId}"><span class="ai-typing">🤖 Claude está analizando el partido...</span></div>`;
+  const memBadge=(hMem||aMem)?`<span style="font-size:9px;background:rgba(155,114,232,.15);color:var(--purple);border:1px solid rgba(155,114,232,.3);border-radius:4px;padding:1px 5px;margin-left:6px">🧠 con memoria</span>`:'';
+  aiDiv.innerHTML=`<div class="chat-bubble ai-bubble" id="${respId}"><span class="ai-typing">🤖 Analizando${memBadge}...</span></div>`;
   msgs.appendChild(aiDiv);
   msgs.scrollTop=msgs.scrollHeight;
 
@@ -2932,14 +3035,26 @@ ${weather?`CLIMA EN ${match.venue?.split(',')[0]||'la ciudad'}:
     const resp=await fetch('http://localhost:8000/chat',{
       method:'POST',
       headers:{'content-type':'application/json'},
-      body:JSON.stringify({question,context:matchCtx,api_key:AI_KEY||''})
+      body:JSON.stringify({question,context:matchCtx,system:systemPrompt,api_key:AI_KEY||''})
     });
-    if(!resp.ok){throw new Error(`Error ${resp.status}`);}
+    if(!resp.ok)throw new Error(`Error ${resp.status}`);
     const data=await resp.json();
-    if(data.error){throw new Error(data.error);}
-    const text=(data.text||'Sin respuesta').replace(/\n/g,'<br>');
+    if(data.error)throw new Error(data.error);
+    const rawText=data.text||'Sin respuesta';
+
+    // ── Parse & save memory ──
+    tmParseAndSave(rawText,hId,hN,aId,aN,matchDesc);
+
+    // ── Display (hide ---MEMORIA--- block from user) ──
+    const displayText=rawText.replace(/---MEMORIA---[\s\S]*?(?:---|$)/i,'').trim().replace(/\n/g,'<br>');
     const el=document.getElementById(respId);
-    if(el)el.innerHTML=text;
+    const memCount=tmCount();
+    const memFooter=`<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border);font-size:9px;color:var(--text3);display:flex;align-items:center;gap:8px">
+      <span>🧠 Memoria actualizada · ${memCount} equipo${memCount!==1?'s':''} en base</span>
+      <button onclick="showTeamMemoryModal(${hId},'${hN}')" style="background:none;border:1px solid var(--border);color:var(--text3);font-size:9px;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:inherit">${hN}</button>
+      <button onclick="showTeamMemoryModal(${aId},'${aN}')" style="background:none;border:1px solid var(--border);color:var(--text3);font-size:9px;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:inherit">${aN}</button>
+    </div>`;
+    if(el)el.innerHTML=displayText+memFooter;
   }catch(err){
     const el=document.getElementById(respId);
     if(el)el.innerHTML=`<span style="color:var(--red)">⚠️ ${err.message}</span>`;

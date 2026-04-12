@@ -2457,8 +2457,22 @@ const FORMATIONS = {
   }
 };
 
+/* ── Tactical modifiers per formation ── */
+const FORMATION_TACTICS = {
+  '4-4-2':   {att:1.00,def:1.00,label:'Equilibrado'},
+  '4-3-3':   {att:1.12,def:0.90,label:'Ofensivo'},
+  '4-2-3-1': {att:1.08,def:1.02,label:'Control'},
+  '3-5-2':   {att:1.05,def:0.95,label:'Mediocampo'},
+  '5-3-2':   {att:0.92,def:1.12,label:'Defensivo'},
+  '5-4-1':   {att:0.80,def:1.22,label:'Ultra-defensivo'},
+  '4-5-1':   {att:0.88,def:1.10,label:'Compacto'},
+  '3-4-3':   {att:1.20,def:0.85,label:'Ultra-ofensivo'},
+};
+
 function buildTacticTab(matchId, hN, aN) {
   const formOpts = Object.keys(FORMATIONS).map(f=>`<option value="${f}">${f}</option>`).join('');
+  const formOpts2 = Object.keys(FORMATIONS).map(f=>`<option value="${f}"${f==='4-3-3'?' selected':''}>${f}</option>`).join('');
+  const squadBtn=(side,label,val)=>`<button onclick="this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('active'));this.classList.add('active');document.getElementById('squad-${side}-${matchId}').value='${val}'" style="flex:1;padding:5px 4px;border-radius:6px;border:1px solid var(--border2);background:var(--surface3);color:var(--text2);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s">${label}</button>`;
   return `<div class="tactic-wrap">
     <div class="tactic-form-row">
       <span class="tactic-team-label home">🏠 ${hN}</span>
@@ -2469,28 +2483,42 @@ function buildTacticTab(matchId, hN, aN) {
     <div class="tactic-form-row">
       <span class="tactic-team-label away">✈️ ${aN}</span>
       <select class="tactic-select" id="tactic-form-away-${matchId}" onchange="updateFormationDots('${matchId}','away')">
-        ${formOpts.replace('<option value="4-4-2">4-4-2</option>','<option value="4-4-2">4-4-2</option>').replace('<option value="4-3-3">4-3-3</option>','<option value="4-3-3" selected>4-3-3</option>')}
+        ${formOpts2}
       </select>
     </div>
+
+    <!-- Squad status -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0">
+      <div style="background:var(--surface3);border-radius:8px;padding:8px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:5px">🏠 Plantel ${hN}</div>
+        <input type="hidden" id="squad-home-${matchId}" value="full">
+        <div style="display:flex;gap:3px">${squadBtn('home','Completo','full')}${squadBtn('home','1-2 bajas','minor')}${squadBtn('home','Muy afect.','major')}</div>
+      </div>
+      <div style="background:var(--surface3);border-radius:8px;padding:8px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:5px">✈️ Plantel ${aN}</div>
+        <input type="hidden" id="squad-away-${matchId}" value="full">
+        <div style="display:flex;gap:3px">${squadBtn('away','Completo','full')}${squadBtn('away','1-2 bajas','minor')}${squadBtn('away','Muy afect.','major')}</div>
+      </div>
+    </div>
+
+    <!-- News input -->
+    <div style="margin-bottom:8px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:4px">📰 Noticias / Contexto</div>
+      <textarea id="tactic-news-${matchId}" rows="2" placeholder="Ej: Kane lesionado, Salah vuelve de sanción, rival sin goles últimos 4 partidos..." style="width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:8px;padding:7px 9px;color:var(--text);font-size:11px;font-family:inherit;resize:none;box-sizing:border-box;outline:none"></textarea>
+    </div>
+
     <div class="tactic-pitch-wrap">
       <div class="tactic-pitch">
         <svg id="tactic-svg-${matchId}" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
-          <!-- Pitch markings -->
           <rect x="0" y="0" width="300" height="200" fill="none"/>
-          <!-- Center line -->
           <line x1="150" y1="0" x2="150" y2="200" stroke="rgba(255,255,255,.25)" stroke-width="1"/>
-          <!-- Center circle -->
           <circle cx="150" cy="100" r="28" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1"/>
           <circle cx="150" cy="100" r="2" fill="rgba(255,255,255,.4)"/>
-          <!-- Penalty areas -->
           <rect x="0" y="55" width="42" height="90" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
           <rect x="258" y="55" width="42" height="90" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
-          <!-- Goal areas -->
           <rect x="0" y="75" width="16" height="50" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
           <rect x="284" y="75" width="16" height="50" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
-          <!-- Outer border -->
           <rect x="1" y="1" width="298" height="198" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
-          <!-- Player dots — rendered by JS -->
           <g id="tactic-players-${matchId}"></g>
         </svg>
       </div>
@@ -2528,107 +2556,274 @@ function updateFormationDots(matchId, side) {
 // updateFormationDots is called via setTimeout after detail.innerHTML is set
 // and also via the tactic tab select onchange handlers
 
+/* ── Helpers for enhanced simulation ── */
+function _clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+
+function _formBounceMod(form){
+  // form = array like ['W','L','L','L','D'] most-recent first
+  let streak=0;
+  for(const r of form){if(r==='L')streak++;else break;}
+  // Bounce: after 3+ consecutive losses teams often react
+  if(streak>=4)return 1.10;
+  if(streak>=3)return 1.07;
+  if(streak>=2)return 1.03;
+  // Win streak: pressure/overconfidence
+  let ws=0;for(const r of form){if(r==='W')ws++;else break;}
+  if(ws>=4)return 0.97;
+  return 1.0;
+}
+
+function _formQuality(gpg,gcpg){
+  // Ratio of attack quality vs defensive leakage
+  const gd=gpg-gcpg;
+  return 1.0+_clamp(gd,-1.2,1.2)*0.10;
+}
+
+function _positionMod(pos){
+  // Position 1 → +8%, position 20 → -8%
+  const p=pos||10;
+  return 1.0+(10-p)/20*0.08;
+}
+
+function _squadMod(status){
+  if(status==='minor')return 0.90;  // 1-2 key players out
+  if(status==='major')return 0.80;  // 3+ key players out
+  return 1.0;
+}
+
+function _newsMod(newsText, team){
+  if(!newsText)return{att:1,def:1,notes:[]};
+  const t=newsText.toLowerCase();
+  let att=1,def=1;
+  const notes=[];
+  const words=['lesionado','lesion','injured','injury','baja','suspendido','suspended','out','ausente'];
+  const positiveWords=['vuelve','regresa','returns','recovered','recuperado','disponible'];
+  // Count negative signals
+  let neg=0;
+  words.forEach(w=>{if(t.includes(w))neg++;});
+  if(neg>=3){att*=0.82;def*=0.88;notes.push('⚠️ Varias bajas importantes detectadas');}
+  else if(neg>=2){att*=0.88;def*=0.92;notes.push('⚠️ Bajas clave detectadas');}
+  else if(neg>=1){att*=0.93;def*=0.95;notes.push('⚠️ Alguna baja detectada');}
+  // Positive signals
+  let pos=0;
+  positiveWords.forEach(w=>{if(t.includes(w))pos++;});
+  if(pos>=1){att*=1.06;notes.push('✅ Jugadores recuperados detectados');}
+  // Manager change = uncertainty
+  if(t.includes('técnico')&&(t.includes('nuevo')||t.includes('cambio')||t.includes('despedido')||t.includes('sacked'))){
+    att*=0.97;def*=0.97;notes.push('🔄 Cambio de técnico: incertidumbre táctica');}
+  return{att,def,notes};
+}
+
+function _poissonGoalsByMin(xg){
+  // Returns array of minutes where goals occur using Poisson process
+  const goals=[];
+  const lambda=xg/90;
+  for(let m=1;m<=93;m++){
+    // Higher probability in stoppage time (90-93) and late pressure (75-90)
+    let prob=lambda;
+    if(m>89)prob*=1.6;
+    else if(m>75)prob*=1.15;
+    if(Math.random()<prob)goals.push(Math.min(m,90+(m>90?m-90:0)));
+  }
+  return goals;
+}
+
+function _shotsMissed(xg){
+  const onTarget=Math.round(xg*2.2+Math.random()*2);
+  const offTarget=Math.round(xg*1.8+Math.random()*3);
+  return{onTarget:Math.max(0,onTarget),offTarget:Math.max(0,offTarget)};
+}
+
 async function runTacticSimulation(matchId) {
   const btn = document.getElementById('tactic-btn-'+matchId);
   const output = document.getElementById('tactic-sim-output-'+matchId);
   if(!btn || !output) return;
-
-  btn.disabled = true;
-  btn.textContent = '⏳ Simulando...';
+  btn.disabled=true; btn.textContent='⏳ Calculando factores...';
 
   const ctx = matchContextCache[matchId];
-  const hN = ctx ? (ctx.match.homeTeam.shortName||ctx.match.homeTeam.name) : 'Local';
-  const aN = ctx ? (ctx.match.awayTeam.shortName||ctx.match.awayTeam.name) : 'Visitante';
-  const xgH = ctx ? parseFloat(ctx.mkts.expH)||1.3 : 1.3;
-  const xgA = ctx ? parseFloat(ctx.mkts.expA)||1.0 : 1.0;
+  const hN = ctx?(ctx.match.homeTeam.shortName||ctx.match.homeTeam.name):'Local';
+  const aN = ctx?(ctx.match.awayTeam.shortName||ctx.match.awayTeam.name):'Visitante';
 
-  // Generate events
-  const events = [];
-  let hScore = 0, aScore = 0;
-  const numEvents = 8 + Math.floor(Math.random()*5);
-  const usedMins = new Set();
-  const randMin = () => { let m; do{ m=1+Math.floor(Math.random()*90); }while(usedMins.has(m)); usedMins.add(m); return m; };
+  // ── 1. Base xG from context ──
+  let xgHbase = ctx? parseFloat(ctx.mkts.expH)||1.3 : 1.3;
+  let xgAbase = ctx? parseFloat(ctx.mkts.expA)||1.0 : 1.0;
 
-  // Goals based on xG
-  const hGoals = Math.round((xgH + (Math.random()-0.5)*0.6) * (0.7+Math.random()*0.6));
-  const aGoals = Math.round((xgA + (Math.random()-0.5)*0.6) * (0.6+Math.random()*0.6));
-  for(let i=0;i<hGoals;i++) events.push({min:randMin(),type:'goal',team:'home',icon:'⚽',desc:`¡GOL! <strong>${hN}</strong> anota`});
-  for(let i=0;i<aGoals;i++) events.push({min:randMin(),type:'goal',team:'away',icon:'⚽',desc:`¡GOL! <strong>${aN}</strong> anota`});
+  // ── 2. Formation modifiers ──
+  const fH = document.getElementById('tactic-form-home-'+matchId)?.value||'4-4-2';
+  const fA = document.getElementById('tactic-form-away-'+matchId)?.value||'4-3-3';
+  const fmH = FORMATION_TACTICS[fH]||{att:1,def:1};
+  const fmA = FORMATION_TACTICS[fA]||{att:1,def:1};
 
-  // Shots
-  const hShots = 2+Math.floor(Math.random()*5);
-  const aShots = 1+Math.floor(Math.random()*4);
-  for(let i=0;i<hShots;i++) events.push({min:randMin(),type:'shot',team:'home',icon:'🎯',desc:`Disparo de <strong>${hN}</strong> — fuera`});
-  for(let i=0;i<aShots;i++) events.push({min:randMin(),type:'shot',team:'away',icon:'🎯',desc:`Remate de <strong>${aN}</strong> — bloqueado`});
+  // ── 3. Form quality (GD-based) — gis has gpg/gcpg per team ──
+  const gis = ctx?.gis||{};
+  const hFormQual = _formQuality(gis.hGpg||1.2, gis.hGcpg||1.0);
+  const aFormQual = _formQuality(gis.aGpg||1.0, gis.aGcpg||1.1);
 
-  // Saves
-  if(hGoals>0||Math.random()>.4) events.push({min:randMin(),type:'save',team:'away',icon:'🧤',desc:`Atajada clave del portero de <strong>${aN}</strong>`});
-  if(aGoals>0||Math.random()>.4) events.push({min:randMin(),type:'save',team:'home',icon:'🧤',desc:`Gran parada del arquero de <strong>${hN}</strong>`});
+  // ── 4. Bounce-back — hf/af are arrays ['W','L','D',...] most-recent first ──
+  const hResults = Array.isArray(ctx?.hf) ? ctx.hf : [];
+  const aResults = Array.isArray(ctx?.af) ? ctx.af : [];
+  const hBounce = _formBounceMod(hResults);
+  const aBounce = _formBounceMod(aResults);
 
-  // Yellow cards (~2 per game)
-  const cards = 1+Math.floor(Math.random()*3);
-  const cardTeams = [hN,aN];
-  for(let i=0;i<cards;i++) events.push({min:randMin(),type:'card',team:'home',icon:'🟡',desc:`Tarjeta amarilla — <strong>${cardTeams[i%2]}</strong>`});
+  // ── 5. Table position ──
+  const table = standings[currentLeague]||[];
+  const hRow = table.find(r=>r.team.id===ctx?.match?.homeTeam?.id);
+  const aRow = table.find(r=>r.team.id===ctx?.match?.awayTeam?.id);
+  const hPosMod = _positionMod(hRow?.position);
+  const aPosMod = _positionMod(aRow?.position);
+
+  // ── 6. Squad status ──
+  const hSquad = document.getElementById('squad-home-'+matchId)?.value||'full';
+  const aSquad = document.getElementById('squad-away-'+matchId)?.value||'full';
+  const hSquadMod = _squadMod(hSquad);
+  const aSquadMod = _squadMod(aSquad);
+
+  // ── 7. News modifiers ──
+  const newsText = document.getElementById('tactic-news-'+matchId)?.value||'';
+  const hNews = _newsMod(newsText, hN);
+  const aNews = _newsMod(newsText, aN);
+
+  // ── 8. Final xG calculation ──
+  // Attack modifier for home = formation_att * quality * position * bounce * squad * news
+  // Defense modifier = opponent's formation_def * their quality inversely
+  const xgH = xgHbase
+    * fmH.att  * hFormQual * hPosMod * hBounce * hSquadMod * hNews.att
+    / (fmA.def * _clamp(aFormQual,0.8,1.2));
+  const xgA = xgAbase
+    * fmA.att  * aFormQual * aPosMod * aBounce * aSquadMod * aNews.att
+    / (fmH.def * _clamp(hFormQual,0.8,1.2));
+
+  const xgHfinal = _clamp(xgH, 0.3, 4.5);
+  const xgAfinal = _clamp(xgA, 0.2, 3.5);
+
+  // ── 9. Build factor breakdown string ──
+  const factorLines=[];
+  if(fmH.att!==1||fmA.def!==1) factorLines.push(`📐 Formación ${hN} <strong>${fH}</strong> (${fmH.att>=1?'+':''}${((fmH.att-1)*100).toFixed(0)}% ataque) vs ${fA} (${fmA.def>=1?'+':''}${((fmA.def-1)*100).toFixed(0)}% defensa visitante)`);
+  if(hBounce!==1) factorLines.push(`🔁 Efecto rebote <strong>${hN}</strong>: +${((hBounce-1)*100).toFixed(0)}% (racha de derrotas)`);
+  if(aBounce!==1) factorLines.push(`🔁 Efecto rebote <strong>${aN}</strong>: +${((aBounce-1)*100).toFixed(0)}% (racha de derrotas)`);
+  if(hSquad!=='full') factorLines.push(`🏥 Plantel <strong>${hN}</strong>: ${hSquad==='minor'?'−10%':'−20%'} (bajas)`);
+  if(aSquad!=='full') factorLines.push(`🏥 Plantel <strong>${aN}</strong>: ${aSquad==='minor'?'−10%':'−20%'} (bajas)`);
+  [...hNews.notes,...aNews.notes].forEach(n=>factorLines.push(n));
+  if(hRow) factorLines.push(`📊 Posición ${hN}: #${hRow.position} · ${hRow.points}pts`);
+  if(aRow) factorLines.push(`📊 Posición ${aN}: #${aRow.position} · ${aRow.points}pts`);
+
+  btn.textContent='⏳ Simulando...';
+
+  // ── 10. Poisson minute-by-minute goal generation ──
+  const hGoalMins = _poissonGoalsByMin(xgHfinal);
+  const aGoalMins = _poissonGoalsByMin(xgAfinal);
+  const hShots = _shotsMissed(xgHfinal);
+  const aShots = _shotsMissed(xgAfinal);
+
+  // ── 11. Build event list ──
+  const usedMins=new Set();
+  const randMin=(lo=1,hi=90)=>{let m,t=0;do{m=lo+Math.floor(Math.random()*(hi-lo+1));t++;}while(usedMins.has(m)&&t<20);usedMins.add(m);return m;};
+  const events=[];
+
+  // Goals
+  hGoalMins.forEach(m=>events.push({min:m,type:'goal',team:'home',icon:'⚽',
+    desc:`¡GOOOL! <strong>${hN}</strong> convierte — ${['tiro al ángulo','remate potente','cabezazo al palo corto','definición precisa'][Math.floor(Math.random()*4)]}`}));
+  aGoalMins.forEach(m=>events.push({min:m,type:'goal',team:'away',icon:'⚽',
+    desc:`¡GOOOOL! <strong>${aN}</strong> marca — ${['contraataque letal','penal convertido','disparo lejano','remate de cabeza'][Math.floor(Math.random()*4)]}`}));
+
+  // Shots on target (misses)
+  const hShotMins=Math.min(hShots.onTarget,5);
+  const aShotMins=Math.min(aShots.onTarget,4);
+  for(let i=0;i<hShotMins;i++) events.push({min:randMin(5,88),type:'shot',team:'home',icon:'🎯',
+    desc:`Remate de <strong>${hN}</strong> — ${['al larguero','desviado','atajado','al palo'][i%4]}`});
+  for(let i=0;i<aShotMins;i++) events.push({min:randMin(5,88),type:'shot',team:'away',icon:'🎯',
+    desc:`Tiro de <strong>${aN}</strong> — ${['bloqueado','arriba','al lateral de la red','parada'][i%4]}`});
+
+  // Saves (proportional to xG of opponent)
+  if(xgAfinal>0.8) events.push({min:randMin(15,85),type:'save',team:'home',icon:'🧤',
+    desc:`Tapada clave del arquero de <strong>${hN}</strong>`});
+  if(xgHfinal>0.8) events.push({min:randMin(15,85),type:'save',team:'away',icon:'🧤',
+    desc:`Gran parada del portero de <strong>${aN}</strong>`});
+  if(xgAfinal>1.5) events.push({min:randMin(60,90),type:'save',team:'home',icon:'🧤',
+    desc:`<strong>${hN}</strong> evita el gol con una atajada de urgencia`});
+
+  // Yellow cards (avg ~3 per PL game)
+  const totalCards=2+Math.floor(Math.random()*3);
+  for(let i=0;i<totalCards;i++){
+    const team=Math.random()<0.5?'home':'away';
+    const tName=team==='home'?hN:aN;
+    events.push({min:randMin(10,90),type:'card',team,icon:'🟡',
+      desc:`Tarjeta amarilla — <strong>${tName}</strong>`});
+  }
+  // Red card (~8% chance)
+  if(Math.random()<0.08){
+    const team=Math.random()<0.5?'home':'away';
+    events.push({min:randMin(40,88),type:'card',team,icon:'🔴',
+      desc:`¡TARJETA ROJA! <strong>${team==='home'?hN:aN}</strong> se queda con 10`});
+  }
+
+  // Corners (proportional to shots)
+  const cornersH=2+Math.floor(xgHfinal*2.5+Math.random()*2);
+  const cornersA=1+Math.floor(xgAfinal*2+Math.random()*2);
+  if(cornersH>3) events.push({min:randMin(20,80),type:'shot',team:'home',icon:'🚩',
+    desc:`${cornersH} córners de <strong>${hN}</strong> en el partido`});
+  if(cornersA>3) events.push({min:randMin(20,80),type:'shot',team:'away',icon:'🚩',
+    desc:`${cornersA} córners de <strong>${aN}</strong> en el partido`});
 
   events.sort((a,b)=>a.min-b.min);
 
-  // Count final score
-  events.forEach(e=>{ if(e.type==='goal'){ if(e.team==='home') hScore++; else aScore++; }});
+  // ── 12. Factor summary header ──
+  const factorHtml = factorLines.length
+    ? `<div style="background:rgba(61,117,227,.08);border:1px solid rgba(61,117,227,.2);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:10px;color:var(--text2);line-height:1.7">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-bottom:4px">⚙️ Factores aplicados</div>
+        ${factorLines.map(l=>`<div>${l}</div>`).join('')}
+        <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:16px">
+          <span>xG <strong style="color:#3d75e3">${hN}</strong> <strong>${xgHfinal.toFixed(2)}</strong></span>
+          <span>xG <strong style="color:#ff8c42">${aN}</strong> <strong>${xgAfinal.toFixed(2)}</strong></span>
+        </div>
+       </div>` : '';
 
-  // Animate
-  output.innerHTML = `<div class="sim-clock" id="sim-clock-${matchId}">0'</div>
+  // ── 13. Animate ──
+  output.innerHTML = factorHtml+`<div class="sim-clock" id="sim-clock-${matchId}">0'</div>
     <div class="sim-score-display" id="sim-score-${matchId}">0 – 0</div>
     <div class="sim-score-teams"><span style="color:#3d75e3">${hN}</span><span style="color:#8e9ab3">vs</span><span style="color:#ff8c42">${aN}</span></div>
     <div class="sim-feed" id="sim-feed-${matchId}"></div>`;
 
-  const feed = document.getElementById('sim-feed-'+matchId);
-  const clock = document.getElementById('sim-clock-'+matchId);
-  const scoreEl = document.getElementById('sim-score-'+matchId);
+  const feed=document.getElementById('sim-feed-'+matchId);
+  const clock=document.getElementById('sim-clock-'+matchId);
+  const scoreEl=document.getElementById('sim-score-'+matchId);
+  const totalMs=5000, msPerMin=totalMs/93;
+  let curH=0,curA=0,eIdx=0;
 
-  const totalMs = 4000;
-  const msPerMin = totalMs / 90;
-  let curH=0, curA=0;
-  let eIdx=0;
-
-  await new Promise(resolve => {
+  await new Promise(resolve=>{
     let elapsed=0;
-    const interval = setInterval(()=>{
-      elapsed += 50;
-      const curMin = Math.min(90, Math.round(elapsed/msPerMin));
-      clock.textContent = curMin+"'";
-      while(eIdx<events.length && events[eIdx].min <= curMin){
+    const interval=setInterval(()=>{
+      elapsed+=50;
+      const curMin=Math.min(93,Math.round(elapsed/msPerMin));
+      clock.textContent=curMin<=90?curMin+"'":`90+${curMin-90}'`;
+      while(eIdx<events.length&&events[eIdx].min<=curMin){
         const ev=events[eIdx];
-        if(ev.type==='goal'){
-          if(ev.team==='home') curH++; else curA++;
-          scoreEl.textContent = curH+' – '+curA;
-        }
+        if(ev.type==='goal'){if(ev.team==='home')curH++;else curA++;scoreEl.textContent=curH+' – '+curA;}
         const div=document.createElement('div');
         div.className='sim-event '+(ev.type);
-        div.innerHTML=`<span class="sim-event-min">${ev.min}'</span><span class="sim-event-icon">${ev.icon}</span><span class="sim-event-desc">${ev.desc}</span>`;
-        feed.appendChild(div);
-        feed.scrollTop=feed.scrollHeight;
-        eIdx++;
+        div.innerHTML=`<span class="sim-event-min">${ev.min<=90?ev.min+"'":ev.min+"'"}</span><span class="sim-event-icon">${ev.icon}</span><span class="sim-event-desc">${ev.desc}</span>`;
+        feed.appendChild(div);feed.scrollTop=feed.scrollHeight;eIdx++;
       }
-      if(elapsed>=totalMs){ clearInterval(interval); resolve(); }
+      if(elapsed>=totalMs){clearInterval(interval);resolve();}
     },50);
   });
 
-  clock.textContent = "FINAL";
-  const outcome = curH>curA?'W':curH<curA?'L':'D';
-  const outcomeLabel = curH>curA?`Victoria ${hN}`:curH<curA?`Victoria ${aN}`:'Empate';
-  const finalDiv = document.createElement('div');
+  clock.textContent='FINAL';
+  const outcome=curH>curA?'W':curH<curA?'L':'D';
+  const outcomeLabel=curH>curA?`Victoria ${hN}`:curH<curA?`Victoria ${aN}`:'Empate';
+  const statsLine=`${hShots.onTarget+hGoalMins.length} tiros al arco · ${cornersH} córners | ${aShots.onTarget+aGoalMins.length} tiros · ${cornersA} córners`;
+
+  const finalDiv=document.createElement('div');
   finalDiv.className='sim-final-badge';
   finalDiv.innerHTML=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#8e9ab3;margin-bottom:4px">RESULTADO FINAL</div>
     <div class="sim-final-score">${curH} – ${curA}</div>
     <div class="sim-score-teams"><span style="color:#3d75e3">${hN}</span><span style="color:#8e9ab3">vs</span><span style="color:#ff8c42">${aN}</span></div>
+    <div style="font-size:9px;color:var(--text3);margin:4px 0 6px">${statsLine}</div>
     <span class="sim-final-outcome sim-outcome-${outcome}">${outcomeLabel}</span>
     <div style="margin-top:10px"><button class="tactic-replay-btn" onclick="runTacticSimulation('${matchId}')">▶ Simular de nuevo</button></div>`;
   output.appendChild(finalDiv);
 
-  btn.disabled = false;
-  btn.textContent = '▶ SIMULAR PARTIDO';
-
-  // Re-render dots after sim
+  btn.disabled=false; btn.textContent='▶ SIMULAR PARTIDO';
   updateFormationDots(matchId,'both');
 }
 

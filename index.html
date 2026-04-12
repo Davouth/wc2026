@@ -2523,8 +2523,106 @@ function buildTacticTab(matchId, hN, aN) {
         </svg>
       </div>
     </div>
+    <!-- Lineup loader -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <button onclick="loadLineup('${matchId}')" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;padding:6px 12px;border-radius:8px;font-family:inherit;flex-shrink:0">⚽ Cargar alineaciones reales</button>
+      <span id="lineup-status-${matchId}" style="font-size:10px;color:var(--text3)"></span>
+    </div>
+    <!-- Lineup list (titulares + suplentes) -->
+    <div id="lineup-list-${matchId}" style="background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;max-height:260px;overflow-y:auto;display:none"></div>
+    <script>
+      (function(){
+        const el=document.getElementById('lineup-list-${matchId}');
+        const obs=new MutationObserver(()=>{if(el.innerHTML.trim())el.style.display='block';});
+        if(el)obs.observe(el,{childList:true});
+      })();
+    </script>
+
     <button class="tactic-sim-btn" id="tactic-btn-${matchId}" onclick="runTacticSimulation('${matchId}')">▶ SIMULAR PARTIDO</button>
     <div id="tactic-sim-output-${matchId}"></div>
+  </div>`;
+}
+
+/* ── Lineup cache: matchId → {home:[{name,pos,shirt}...], away:[...], hFormation, aFormation} ── */
+const lineupCache = {};
+
+async function loadLineup(matchId) {
+  if(lineupCache[matchId]) return lineupCache[matchId];
+  const el = document.getElementById('lineup-status-'+matchId);
+  if(el) el.textContent = '⏳ Cargando alineaciones...';
+  try {
+    const data = await apiGet(`/matches/${matchId}`);
+    const lineups = data?.lineups || [];
+    if(!lineups.length) {
+      if(el) el.textContent = '⚠️ Alineaciones no disponibles aún (se publican ~1h antes del partido)';
+      return null;
+    }
+    const ctx = matchContextCache[matchId];
+    const hId = ctx?.match?.homeTeam?.id;
+    const aId = ctx?.match?.awayTeam?.id;
+    const hRaw = lineups.find(l => l.team?.id === hId) || lineups[0];
+    const aRaw = lineups.find(l => l.team?.id === aId) || lineups[1];
+    const parse = (raw) => ({
+      formation: raw?.formation || '4-4-2',
+      starters: (raw?.startXI || []).map(p => ({
+        name: p.player?.name || '?',
+        short: (p.player?.name||'?').split(' ').pop(),
+        pos: p.player?.position || '',
+        shirt: p.player?.shirtNumber || ''
+      })),
+      bench: (raw?.bench || []).map(p => ({
+        name: p.player?.name || '?',
+        short: (p.player?.name||'?').split(' ').pop(),
+        pos: p.player?.position || '',
+        shirt: p.player?.shirtNumber || ''
+      }))
+    });
+    const result = { home: parse(hRaw), away: parse(aRaw) };
+    lineupCache[matchId] = result;
+    // Auto-set formation selectors
+    const selH = document.getElementById('tactic-form-home-'+matchId);
+    const selA = document.getElementById('tactic-form-away-'+matchId);
+    if(selH && result.home.formation && FORMATIONS[result.home.formation]) selH.value = result.home.formation;
+    if(selA && result.away.formation && FORMATIONS[result.away.formation]) selA.value = result.away.formation;
+    // Update pitch and lineup list
+    updateFormationDots(matchId, 'both');
+    renderLineupList(matchId);
+    if(el) el.textContent = `✅ Alineaciones cargadas · ${result.home.formation} vs ${result.away.formation}`;
+    return result;
+  } catch(e) {
+    if(el) el.textContent = `⚠️ ${e.message?.includes('no disponible') ? 'Liga no incluye alineaciones en este plan' : 'Error al cargar alineaciones'}`;
+    return null;
+  }
+}
+
+function renderLineupList(matchId) {
+  const el = document.getElementById('lineup-list-'+matchId);
+  if(!el) return;
+  const lu = lineupCache[matchId];
+  if(!lu) return;
+  const ctx = matchContextCache[matchId];
+  const hN = ctx?.match?.homeTeam?.shortName || 'Local';
+  const aN = ctx?.match?.awayTeam?.shortName || 'Visitante';
+
+  const playerRow = (p, color) =>
+    `<div style="display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span style="min-width:16px;text-align:center;font-size:9px;font-weight:800;color:${color};opacity:.7">${p.shirt||''}</span>
+      <span style="font-size:11px;color:var(--text);font-weight:600;flex:1">${p.name}</span>
+      <span style="font-size:9px;color:var(--text3)">${p.pos?.replace('Goalkeeper','GK').replace('Defence','DEF').replace('Midfield','MID').replace('Offence','DEL')}</span>
+     </div>`;
+
+  const col = (title, players, color, bench) =>
+    `<div style="flex:1;min-width:0">
+       <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:${color};margin-bottom:6px">${title} (${players[0]?.formation||''})</div>
+       ${players.starters.map(p=>playerRow(p,color)).join('')}
+       ${bench&&players.bench.length?`<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin:6px 0 3px">Suplentes</div>
+       ${players.bench.map(p=>playerRow(p,'var(--text3)')).join('')}`:''}
+     </div>`;
+
+  el.innerHTML = `<div style="display:flex;gap:12px;font-size:11px">
+    ${col(`🏠 ${hN}`,lu.home,'#3d75e3',true)}
+    <div style="width:1px;background:var(--border)"></div>
+    ${col(`✈️ ${aN}`,lu.away,'#ff8c42',true)}
   </div>`;
 }
 
@@ -2538,16 +2636,22 @@ function updateFormationDots(matchId, side) {
   if(!g) return;
   const homePos = FORMATIONS[fH]?.home || FORMATIONS['4-4-2'].home;
   const awayPos = FORMATIONS[fA]?.away || FORMATIONS['4-3-3'].away;
+  const lu = lineupCache[matchId];
+  const hPlayers = lu?.home?.starters || [];
+  const aPlayers = lu?.away?.starters || [];
+
   let html = '';
   homePos.forEach((p,i) => {
     const r = i===0?6:5;
+    const name = hPlayers[i]?.short || (i===0?'GK':'');
     html += `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="#3d75e3" stroke="#ffffff" stroke-width="1.2" opacity=".92"/>`;
-    if(i===0) html += `<text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-size="5" fill="#fff" font-weight="700">GK</text>`;
+    if(name) html += `<text x="${p.x}" y="${p.y+r+6}" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,.85)" font-weight="600">${name.slice(0,8)}</text>`;
   });
   awayPos.forEach((p,i) => {
     const r = i===0?6:5;
+    const name = aPlayers[i]?.short || (i===0?'GK':'');
     html += `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="#ff8c42" stroke="#ffffff" stroke-width="1.2" opacity=".92"/>`;
-    if(i===0) html += `<text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-size="5" fill="#fff" font-weight="700">GK</text>`;
+    if(name) html += `<text x="${p.x}" y="${p.y+r+6}" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,.85)" font-weight="600">${name.slice(0,8)}</text>`;
   });
   g.innerHTML = html;
 }
@@ -2716,23 +2820,56 @@ async function runTacticSimulation(matchId) {
   const aShots = _shotsMissed(xgAfinal);
 
   // ── 11. Build event list ──
+  // Get real players from lineup cache
+  const lu=lineupCache[matchId];
+  const hStarters=lu?.home?.starters||[];
+  const aStarters=lu?.away?.starters||[];
+  const goalScorerPool=(starters)=>{
+    const att=starters.filter(p=>p.pos?.includes('Offence'));
+    const mid=starters.filter(p=>p.pos?.includes('Midfield'));
+    const def=starters.filter(p=>p.pos?.includes('Defence'));
+    const pool=[...att,...att,...mid,...def].filter(p=>p.name&&p.name!=='?');
+    return pool.length?pool:starters.slice(1);
+  };
+  const hScorers=goalScorerPool(hStarters);
+  const aScorers=goalScorerPool(aStarters);
+  const randScorer=pool=>pool.length?pool[Math.floor(Math.random()*pool.length)].name:null;
+
   const usedMins=new Set();
   const randMin=(lo=1,hi=90)=>{let m,t=0;do{m=lo+Math.floor(Math.random()*(hi-lo+1));t++;}while(usedMins.has(m)&&t<20);usedMins.add(m);return m;};
   const events=[];
+  const gTypH=['tiro al ángulo','remate potente','cabezazo','definición precisa','remate de zurda','jugada de pelota parada'];
+  const gTypA=['contraataque letal','penal convertido','disparo lejano','remate de cabeza','combinación táctica','córner'];
 
-  // Goals
-  hGoalMins.forEach(m=>events.push({min:m,type:'goal',team:'home',icon:'⚽',
-    desc:`¡GOOOL! <strong>${hN}</strong> convierte — ${['tiro al ángulo','remate potente','cabezazo al palo corto','definición precisa'][Math.floor(Math.random()*4)]}`}));
-  aGoalMins.forEach(m=>events.push({min:m,type:'goal',team:'away',icon:'⚽',
-    desc:`¡GOOOOL! <strong>${aN}</strong> marca — ${['contraataque letal','penal convertido','disparo lejano','remate de cabeza'][Math.floor(Math.random()*4)]}`}));
+  // Goals — with real scorer names when available
+  hGoalMins.forEach(m=>{
+    const sc=randScorer(hScorers);
+    const type=gTypH[Math.floor(Math.random()*gTypH.length)];
+    events.push({min:m,type:'goal',team:'home',icon:'⚽',
+      desc:sc?`⚽ <strong>${sc}</strong> (${hN}) — ${type}`:`⚽ ¡GOL! <strong>${hN}</strong> — ${type}`});
+  });
+  aGoalMins.forEach(m=>{
+    const sc=randScorer(aScorers);
+    const type=gTypA[Math.floor(Math.random()*gTypA.length)];
+    events.push({min:m,type:'goal',team:'away',icon:'⚽',
+      desc:sc?`⚽ <strong>${sc}</strong> (${aN}) — ${type}`:`⚽ ¡GOL! <strong>${aN}</strong> — ${type}`});
+  });
 
   // Shots on target (misses)
   const hShotMins=Math.min(hShots.onTarget,5);
   const aShotMins=Math.min(aShots.onTarget,4);
-  for(let i=0;i<hShotMins;i++) events.push({min:randMin(5,88),type:'shot',team:'home',icon:'🎯',
-    desc:`Remate de <strong>${hN}</strong> — ${['al larguero','desviado','atajado','al palo'][i%4]}`});
-  for(let i=0;i<aShotMins;i++) events.push({min:randMin(5,88),type:'shot',team:'away',icon:'🎯',
-    desc:`Tiro de <strong>${aN}</strong> — ${['bloqueado','arriba','al lateral de la red','parada'][i%4]}`});
+  const shotOut=['al larguero','desviado','atajado','al palo','sobre el arco'];
+  const shotOutA=['bloqueado','arriba','al lateral','parada del arquero','desviado'];
+  for(let i=0;i<hShotMins;i++){
+    const sc=randScorer(hScorers);
+    events.push({min:randMin(5,88),type:'shot',team:'home',icon:'🎯',
+      desc:sc?`Remate de <strong>${sc}</strong> — ${shotOut[i%shotOut.length]}`:`Remate de <strong>${hN}</strong> — ${shotOut[i%shotOut.length]}`});
+  }
+  for(let i=0;i<aShotMins;i++){
+    const sc=randScorer(aScorers);
+    events.push({min:randMin(5,88),type:'shot',team:'away',icon:'🎯',
+      desc:sc?`Disparo de <strong>${sc}</strong> — ${shotOutA[i%shotOutA.length]}`:`Tiro de <strong>${aN}</strong> — ${shotOutA[i%shotOutA.length]}`});
+  }
 
   // Saves (proportional to xG of opponent)
   if(xgAfinal>0.8) events.push({min:randMin(15,85),type:'save',team:'home',icon:'🧤',
@@ -2742,13 +2879,17 @@ async function runTacticSimulation(matchId) {
   if(xgAfinal>1.5) events.push({min:randMin(60,90),type:'save',team:'home',icon:'🧤',
     desc:`<strong>${hN}</strong> evita el gol con una atajada de urgencia`});
 
-  // Yellow cards (avg ~3 per PL game)
+  // Yellow cards with real player names
   const totalCards=2+Math.floor(Math.random()*3);
+  const allHPlayers=[...hStarters].filter(p=>p.name&&p.name!=='?');
+  const allAPlayers=[...aStarters].filter(p=>p.name&&p.name!=='?');
   for(let i=0;i<totalCards;i++){
-    const team=Math.random()<0.5?'home':'away';
-    const tName=team==='home'?hN:aN;
-    events.push({min:randMin(10,90),type:'card',team,icon:'🟡',
-      desc:`Tarjeta amarilla — <strong>${tName}</strong>`});
+    const isHome=Math.random()<0.5;
+    const pool=isHome?allHPlayers:allAPlayers;
+    const p=pool.length?pool[Math.floor(Math.random()*pool.length)]:null;
+    const label=p?`<strong>${p.name}</strong>`:isHome?`<strong>${hN}</strong>`:`<strong>${aN}</strong>`;
+    events.push({min:randMin(10,90),type:'card',team:isHome?'home':'away',icon:'🟡',
+      desc:`Tarjeta amarilla — ${label}`});
   }
   // Red card (~8% chance)
   if(Math.random()<0.08){

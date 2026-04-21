@@ -10387,20 +10387,25 @@ const TEAM_STARS = {
 // ─── BANDERAS HD ─────────────────────────────────────────────────────────────
 // Mapeo nombre de equipo (inglés y español) → ISO 3166-1 alpha-2 para flagcdn.com
 const FLAG_CODES = {
-  // Inglés (WC_FIXTURE)
-  'England':'gb-eng','USA':'us','Algeria':'dz','Costa Rica':'cr',
-  'Germany':'de','Mexico':'mx','Ecuador':'ec','Iran':'ir',
-  'France':'fr','Canada':'ca','Nigeria':'ng','Honduras':'hn',
-  'Spain':'es','Switzerland':'ch','Japan':'jp','Scotland':'gb-sct',
-  'Brazil':'br','Portugal':'pt','Ivory Coast':'ci','New Zealand':'nz',
-  'Argentina':'ar','Netherlands':'nl','Senegal':'sn','Saudi Arabia':'sa',
-  'Italy':'it','Uruguay':'uy','South Korea':'kr','Tunisia':'tn',
-  'Croatia':'hr','Colombia':'co','Turkey':'tr','Bahrain':'bh',
-  'Belgium':'be','Morocco':'ma','Ghana':'gh','Jamaica':'jm',
-  'Denmark':'dk','Chile':'cl','Australia':'au','Egypt':'eg',
-  'Poland':'pl','Serbia':'rs','Cameroon':'cm','Iraq':'iq',
-  'Austria':'at','Qatar':'qa','Jordan':'jo','Venezuela':'ve',
-  // Español (WC_STRIKERS y UI)
+  // ── Inglés — todos los 48 equipos WC2026 ────────────────────────────────────
+  'England':'gb-eng','Scotland':'gb-sct','USA':'us','Canada':'ca',
+  'Mexico':'mx','Germany':'de','France':'fr','Spain':'es',
+  'Brazil':'br','Argentina':'ar','Portugal':'pt','Netherlands':'nl',
+  'Belgium':'be','Croatia':'hr','Italy':'it','Denmark':'dk',
+  'Switzerland':'ch','Austria':'at','Poland':'pl','Turkey':'tr',
+  'Japan':'jp','South Korea':'kr','Australia':'au','Iran':'ir',
+  'Saudi Arabia':'sa','Iraq':'iq','Jordan':'jo','Qatar':'qa',
+  'Uruguay':'uy','Colombia':'co','Ecuador':'ec','Paraguay':'py',
+  'Morocco':'ma','Senegal':'sn','Ghana':'gh','Ivory Coast':'ci',
+  'Egypt':'eg','Tunisia':'tn','Algeria':'dz','South Africa':'za',
+  'DR Congo':'cd','Cape Verde':'cv','New Zealand':'nz','Uzbekistan':'uz',
+  'Bosnia':'ba','Czech Republic':'cz','Haiti':'ht','Curacao':'cw',
+  'Sweden':'se','Norway':'no','Panama':'pa',
+  // equipos extra (squad data)
+  'Nigeria':'ng','Honduras':'hn','Jamaica':'jm','Venezuela':'ve',
+  'Chile':'cl','Serbia':'rs','Cameroon':'cm','Bahrain':'bh',
+  'Costa Rica':'cr','Algeria':'dz',
+  // ── Español — WC_STRIKERS y UI ───────────────────────────────────────────────
   'Francia':'fr','Inglaterra':'gb-eng','Brasil':'br','Alemania':'de',
   'España':'es','México':'mx','Países Bajos':'nl','Holanda':'nl',
   'Italia':'it','Portugal':'pt','Bélgica':'be','Marruecos':'ma',
@@ -10409,13 +10414,22 @@ const FLAG_CODES = {
   'Australia':'au','Senegal':'sn','Turquía':'tr','Ecuador':'ec',
   'Chile':'cl','Austria':'at','Serbia':'rs','Ghana':'gh',
   'Egipto':'eg','Camerún':'cm','Nigeria':'ng','Túnez':'tn',
+  'Sudáfrica':'za','República Checa':'cz','Bosnia':'ba','Haití':'ht',
+  'Paraguay':'py','Curazao':'cw','Suecia':'se','Cabo Verde':'cv',
+  'Noruega':'no','Congo DR':'cd','Panamá':'pa','Uzbekistán':'uz',
+  'Arabia Saudita':'sa','Irak':'iq','Jordania':'jo','Argelia':'dz',
+  'Costa Rica':'cr','Venezuela':'ve','Canadá':'ca','Estados Unidos':'us',
 };
 
 function wcFlagImg(team, size=28, large=false) {
-  const code = FLAG_CODES[team];
-  if (!code) return `<span style="font-size:${size*0.75}px;line-height:1">🏳️</span>`;
-  const px = large ? 80 : size <= 24 ? 40 : 40;
-  return `<img src="https://flagcdn.com/w${px}/${code}.png" width="${size}" height="${Math.round(size*0.67)}" class="wc-flag-img${large?' lg':''}" alt="${team}" loading="lazy">`;
+  const code = FLAG_CODES[team] || (typeof _TC_ISO!=='undefined' && _TC_ISO[team]) || '';
+  if (!code) {
+    // Last resort: use emoji from WC_FIXTURE
+    const emoji = (typeof WC_FIXTURE!=='undefined' && WC_FIXTURE[team]?.flag) || '';
+    return `<span style="font-size:${Math.round(size*0.85)}px;line-height:1;vertical-align:middle">${emoji||'🏳️'}</span>`;
+  }
+  const px = large ? 80 : 40;
+  return `<img src="https://flagcdn.com/w${px}/${code}.png" width="${size}" height="${Math.round(size*0.67)}" class="wc-flag-img${large?' lg':''}" alt="${team}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:${Math.round(size*0.85)}px\\'>'+(window.WC_FIXTURE&&WC_FIXTURE['${team}']?.flag||'🏳️')+'</span>'">`;
 }
 
 // ─── DATOS GOLEADOR ───────────────────────────────────────────────────────────

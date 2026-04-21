@@ -1,10 +1,37 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>World Cup 2026 — Simulator</title>
-<!-- PWA -->
+<title>Simulador Mundial 2026 — Pronósticos, Bracket, Álbum y Quiz | WC2026</title>
+
+<!-- ═══ SEO BÁSICO ════════════════════════════════════════════════════════ -->
+<meta name="description" content="El mejor simulador del FIFA World Cup 2026. Simulá los 104 partidos, armá tu bracket, completá el álbum Panini digital, jugá el quiz y competí en la quiniela con amigos. Gratis."/>
+<meta name="keywords" content="simulador mundial 2026, FIFA World Cup 2026, bracket mundial 2026, predicciones mundial 2026, quiniela mundial 2026, álbum panini 2026, goleador mundial 2026, mundial 2026 simulator"/>
+<meta name="author" content="Statball"/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://davouth.github.io/wc2026/wc2026.html"/>
+
+<!-- ═══ OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ════════════════════════ -->
+<meta property="og:type"        content="website"/>
+<meta property="og:site_name"   content="WC2026 Simulator"/>
+<meta property="og:title"       content="Simulador Mundial 2026 — Bracket, Álbum Panini y Quiz"/>
+<meta property="og:description" content="Simulá los 104 partidos del Mundial 2026 con IA. Armá tu bracket, completá el álbum Panini digital, predecí el goleador y competí en la quiniela con amigos."/>
+<meta property="og:url"         content="https://davouth.github.io/wc2026/wc2026.html"/>
+<meta property="og:image"       content="https://davouth.github.io/wc2026/icon.svg"/>
+<meta property="og:image:width" content="512"/>
+<meta property="og:image:height"content="512"/>
+<meta property="og:locale"      content="es_ES"/>
+<meta property="og:locale:alternate" content="en_US"/>
+
+<!-- ═══ TWITTER / X CARD ════════════════════════════════════════════════ -->
+<meta name="twitter:card"        content="summary_large_image"/>
+<meta name="twitter:site"        content="@statball"/>
+<meta name="twitter:title"       content="Simulador Mundial 2026 — Bracket, Álbum y Quiz"/>
+<meta name="twitter:description" content="Simulá los 104 partidos del Mundial 2026 con IA. Bracket interactivo, álbum Panini digital, predictor de goleador y quiniela con amigos."/>
+<meta name="twitter:image"       content="https://davouth.github.io/wc2026/icon.svg"/>
+
+<!-- ═══ PWA ═════════════════════════════════════════════════════════════ -->
 <link rel="manifest" href="./manifest.json"/>
 <meta name="theme-color" content="#374df5"/>
 <meta name="mobile-web-app-capable" content="yes"/>
@@ -13,10 +40,42 @@
 <meta name="apple-mobile-web-app-title" content="WC2026"/>
 <link rel="apple-touch-icon" href="./icon.svg"/>
 <link rel="icon" type="image/svg+xml" href="./icon.svg"/>
-<!-- SEO -->
-<meta name="description" content="Simulador del FIFA World Cup 2026 — pronósticos, álbum de cromos, quiz y apuestas IA"/>
-<meta name="og:title" content="WC2026 Simulator"/>
-<meta name="og:description" content="Pronósticos, álbum Panini, quiz y apuestas IA del Mundial 2026"/>
+
+<!-- ═══ SCHEMA.ORG — Rich Results en Google ═════════════════════════════ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Simulador Mundial 2026",
+  "alternateName": "WC2026 Simulator",
+  "url": "https://davouth.github.io/wc2026/wc2026.html",
+  "description": "Simulador interactivo del FIFA World Cup 2026. Incluye bracket de 104 partidos, álbum Panini digital, predictor de goleador con Monte Carlo, quiniela social y quiz de conocimiento.",
+  "applicationCategory": "SportsApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "Statball"
+  },
+  "inLanguage": ["es", "en"],
+  "keywords": "Mundial 2026, FIFA World Cup 2026, simulador, bracket, quiniela, álbum Panini, goleador",
+  "screenshot": "https://davouth.github.io/wc2026/icon.svg",
+  "featureList": [
+    "Simulador de grupos y bracket completo (104 partidos)",
+    "Álbum Panini digital con 48 equipos",
+    "Predictor de goleador con Monte Carlo",
+    "Quiniela social con leaderboard",
+    "Quiz de conocimiento del Mundial",
+    "Apuestas IA con análisis ELO",
+    "Chat en tiempo real entre usuarios",
+    "Modo PWA instalable"
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script>

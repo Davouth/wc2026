@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://davouth.github.io/wc2026/sitemap.xml

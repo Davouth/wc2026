@@ -2085,6 +2085,63 @@ input.wc-chaos-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;he
   .go-bubble{max-width:168px;font-size:10.5px}
 }
 
+/* ══════════════════════════════════════════
+   MASCOT PREMIUM ENHANCEMENTS
+══════════════════════════════════════════ */
+
+/* ── Level glow aura ── */
+#go-char.lv-1{filter:drop-shadow(0 8px 26px rgba(200,100,0,.42)) drop-shadow(0 3px 8px rgba(0,0,0,.3))}
+#go-char.lv-2{filter:drop-shadow(0 10px 30px rgba(55,77,245,.5)) drop-shadow(0 4px 12px rgba(0,0,0,.35))}
+#go-char.lv-3{filter:drop-shadow(0 12px 36px rgba(139,92,246,.6)) drop-shadow(0 6px 18px rgba(0,0,0,.4))}
+#go-char.lv-4{filter:drop-shadow(0 14px 44px rgba(245,197,24,.65)) drop-shadow(0 0 22px rgba(245,197,24,.3)) drop-shadow(0 6px 18px rgba(0,0,0,.4))}
+#go-char.lv-5{filter:drop-shadow(0 16px 56px rgba(249,115,22,.75)) drop-shadow(0 0 30px rgba(245,197,24,.45)) drop-shadow(0 6px 18px rgba(0,0,0,.5));animation:go-champion-pulse 2.4s ease-in-out infinite!important}
+@keyframes go-champion-pulse{0%,100%{filter:drop-shadow(0 16px 56px rgba(249,115,22,.75)) drop-shadow(0 0 30px rgba(245,197,24,.45))}50%{filter:drop-shadow(0 16px 56px rgba(249,115,22,.95)) drop-shadow(0 0 50px rgba(245,197,24,.7))}}
+
+/* ── Level badge ── */
+#go-level-badge{
+  position:absolute;top:-6px;left:-6px;width:20px;height:20px;
+  border-radius:50%;font-size:8px;font-weight:900;color:#000;
+  display:flex;align-items:center;justify-content:center;
+  border:1.5px solid rgba(255,255,255,.5);z-index:3;
+  box-shadow:0 2px 8px rgba(0,0,0,.5);
+  transition:background .4s ease,box-shadow .4s ease;
+}
+
+/* ── Floating football particles ── */
+.go-ball{
+  position:absolute;font-size:12px;pointer-events:none;z-index:1;
+  animation-timing-function:ease-in-out;animation-iteration-count:infinite;
+  will-change:transform,opacity;
+}
+.go-ball:nth-child(1){bottom:30%;right:110%;animation:go-orbit1 4.2s ease-in-out infinite}
+.go-ball:nth-child(2){bottom:60%;right:105%;animation:go-orbit2 5.8s ease-in-out infinite .9s}
+.go-ball:nth-child(3){bottom:10%;right:108%;animation:go-orbit3 3.6s ease-in-out infinite 1.8s;font-size:9px}
+@keyframes go-orbit1{0%,100%{transform:translate(0,0) rotate(0deg);opacity:.7}33%{transform:translate(-18px,-22px) rotate(120deg);opacity:1}66%{transform:translate(10px,-12px) rotate(240deg);opacity:.6}}
+@keyframes go-orbit2{0%,100%{transform:translate(0,0) rotate(0deg);opacity:.5}50%{transform:translate(-22px,16px) rotate(180deg);opacity:.9}}
+@keyframes go-orbit3{0%,100%{transform:translate(0,0) scale(1);opacity:.4}40%{transform:translate(-12px,-18px) scale(1.2);opacity:.8}80%{transform:translate(8px,8px) scale(.9);opacity:.5}}
+
+/* ── Peek from edge ── */
+@keyframes go-peek{0%{transform:translateX(92%)}100%{transform:translateX(68%)}}
+#go-floater.go-peeking{animation:go-peek .55s cubic-bezier(.22,1,.36,1) forwards}
+
+/* ── Confetti burst ── */
+.go-confetti-bit{
+  position:fixed;pointer-events:none;z-index:99998;border-radius:2px;
+  animation:go-confetti-fall linear forwards;
+}
+@keyframes go-confetti-fall{
+  0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1}
+  100%{transform:translateY(80vh) rotate(720deg) scale(.5);opacity:0}
+}
+
+/* ── Tap ripple on mascot ── */
+.go-tap-ripple{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,200,0,.35) 0%,transparent 70%);
+  pointer-events:none;animation:go-ripple-out .6s ease-out forwards;
+}
+@keyframes go-ripple-out{0%{width:20px;height:20px;opacity:1;margin-left:-10px;margin-top:-10px}100%{width:120px;height:120px;opacity:0;margin-left:-60px;margin-top:-60px}}
+
 /* ══ RESPONSIVE MÓVIL ══════════════════════════════════════════════════════ */
 @media(max-width:700px){
   /* Header — ocultar elementos no esenciales */
@@ -11751,7 +11808,13 @@ function wcMcGol(p){
      ════════════════════════════════════════════════════ -->
 <div id="go-floater">
   <button id="go-toggle-btn" class="go-toggle-btn" title="Ocultar/mostrar GOLAZO" aria-label="Ocultar GOLAZO">◀</button>
-  <div id="go-char">
+  <div id="go-char" class="lv-1">
+    <!-- Level badge -->
+    <div id="go-level-badge" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)" title="Nivel Hincha">Nv1</div>
+    <!-- Floating balls -->
+    <span class="go-ball" aria-hidden="true">⚽</span>
+    <span class="go-ball" aria-hidden="true">⚽</span>
+    <span class="go-ball" aria-hidden="true">🔵</span>
     <!-- Speech bubble -->
     <div id="go-bubble" class="go-bubble"><span id="go-bubble-txt"></span></div>
     <!-- SVG Character — ZAZU el Jaguar 🐆 WC2026 -->
@@ -12003,14 +12066,18 @@ function wcMcGol(p){
   'use strict';
 
   var IDLE_MSGS = [
-    'WC2026 se acerca ⚽🌎',
+    'WC2026 arranca el 11 de junio ⚽🌎',
     '¿Ya revisaste el álbum hoy? 📦',
     '¡Actualizá tu pronóstico! 🎯',
-    'Tip: filtrá por grupo 📊',
-    '3 países, 1 copa 🏆',
+    '¿Sabías que hay 48 equipos este año? 🌍',
+    '3 países, 1 copa 🏆🇲🇽🇺🇸🇨🇦',
     '¿Quién ganará el WC2026? 🌟',
-    '51 días para el Mundial ⏳',
+    '¡Simula el torneo y predice! ⚡',
     '¿Ya completaste el quiz? 🧠',
+    'España es la favorita del Maldini 🇪🇸👑',
+    'Haaland vs Mbappé — ¿quién gana? ⚽',
+    '¡Toca para verme bailar! 💃',
+    '¡Abre un sobre del álbum! 📦✨',
   ];
   var CLICK_MSGS = [
     '¡Vamos campeones! 🏆',
@@ -12018,16 +12085,54 @@ function wcMcGol(p){
     '¡Abrí tu sobre del álbum! 📦',
     'WC2026 es el más grande 🌎⚽',
     '¡México 🇲🇽 USA 🇺🇸 Canadá 🇨🇦!',
+    '¡Soy Zazu, tu asistente del Mundial! 🐆',
+    '¿Ya hiciste tu quiniela? 🏅',
+    '¡Simula y gana XP! ⚡',
   ];
   var TAB_MSGS = {
-    0:'¡Vamos a los grupos! 🏟️',
-    1:'¡La llave del torneo! 🏆',
-    2:'¡Revisa el pronóstico! 📊',
-    3:'¿Quién será el goleador? ⚽',
+    0:'¡Grupos del Mundial! ¿Quién pasa? 🏟️',
+    1:'¡La llave del torneo! 🏆 ¿Quién llega a la final?',
+    2:'¡Revisa los pronósticos de la IA! 📊',
+    3:'¿Quién será el goleador? ⚽ ¡Apuesta!',
     4:'¡Tu quiniela te espera! 🏅',
-    5:'¡Abre sobres del álbum! 📦',
-    6:'¡Portafolio de GCR! 💰',
+    5:'¡Abre sobres del álbum! 📦✨',
+    6:'¡Quiz de conocimiento! 🧠 ¿Cuánto sabes?',
+    7:'¡Apuestas IA — picks del día! 🎰',
   };
+
+  // ── Level system ──
+  var GO_LEVELS = [
+    {lv:1, min:0,    label:'Hincha',   color:'linear-gradient(135deg,#f59e0b,#fbbf24)', cls:'lv-1'},
+    {lv:2, min:100,  label:'Fanático', color:'linear-gradient(135deg,#374df5,#4a61f7)', cls:'lv-2'},
+    {lv:3, min:300,  label:'Experto',  color:'linear-gradient(135deg,#8b5cf6,#a78bfa)', cls:'lv-3'},
+    {lv:4, min:700,  label:'Leyenda',  color:'linear-gradient(135deg,#f5c518,#fbbf24)', cls:'lv-4'},
+    {lv:5, min:1500, label:'Campeón',  color:'linear-gradient(135deg,#f97316,#f5c518)', cls:'lv-5'},
+  ];
+
+  // ── Web Audio sound system ──
+  var _goAudioCtx = null;
+  function _goGetCtx() {
+    if (!_goAudioCtx) { try { _goAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+    return _goAudioCtx;
+  }
+  function _goPlayTone(freq, type, dur, vol) {
+    var ctx = _goGetCtx(); if (!ctx) return;
+    try {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.5, ctx.currentTime + dur);
+      gain.gain.setValueAtTime(vol || 0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
+    } catch(e){}
+  }
+  function _goSoundPop()     { _goPlayTone(520, 'sine', 0.12, 0.10); }
+  function _goSoundCelebrate(){ _goPlayTone(660,'sine',0.08,0.08); setTimeout(function(){_goPlayTone(880,'sine',0.12,0.10);},90); setTimeout(function(){_goPlayTone(1100,'sine',0.18,0.09);},200); }
+  function _goSoundAlert()   { _goPlayTone(220,'sawtooth',0.18,0.08); }
+  function _goVibrate(pattern){ try { if(navigator.vibrate) navigator.vibrate(pattern); } catch(e){} }
 
   function GolazoMascot() {
     this.floater   = document.getElementById('go-floater');
@@ -12047,8 +12152,11 @@ function wcMcGol(p){
     this._minimized   = false;
     this._idleTimer   = null;
     this._stateTimer  = null;
+    this._currentLevel = 1;
     this._bind();
     this._start();
+    this._updateLevel();
+    this._initScrollTrack();
   }
 
   // ── State machine ──
@@ -12117,30 +12225,113 @@ function wcMcGol(p){
     this.goMouthO2.style.display = 'none';
   };
 
+  // ── Level update ──
+  GolazoMascot.prototype._updateLevel = function() {
+    var xp = (typeof wcGamification !== 'undefined' && wcGamification.xp) || 0;
+    var lvData = GO_LEVELS[0];
+    for (var i = GO_LEVELS.length - 1; i >= 0; i--) {
+      if (xp >= GO_LEVELS[i].min) { lvData = GO_LEVELS[i]; break; }
+    }
+    if (this._currentLevel === lvData.lv) return;
+    this._currentLevel = lvData.lv;
+    var cls = GO_LEVELS.map(function(l){return l.cls;});
+    var char = this.char;
+    cls.forEach(function(c){ char.classList.remove(c); });
+    char.classList.add(lvData.cls);
+    var badge = document.getElementById('go-level-badge');
+    if (badge) {
+      badge.style.background = lvData.color;
+      badge.textContent = 'Nv'+lvData.lv;
+      badge.title = lvData.label;
+    }
+    this.say('¡Nivel '+lvData.lv+' — '+lvData.label+'! 🌟', 3000);
+    this.celebrate();
+  };
+
+  // ── Confetti burst ──
+  GolazoMascot.prototype._confetti = function() {
+    var colors = ['#f5c518','#374df5','#10b981','#f97316','#ec4899','#a78bfa','#fff'];
+    for (var i = 0; i < 28; i++) {
+      (function(i){
+        var bit = document.createElement('div');
+        bit.className = 'go-confetti-bit';
+        var startX = window.innerWidth - 80 + (Math.random()-0.5)*60;
+        bit.style.cssText = 'left:'+startX+'px;top:'+(window.innerHeight*0.25+Math.random()*80)+'px;width:'+(5+Math.random()*7)+'px;height:'+(5+Math.random()*7)+'px;background:'+colors[Math.floor(Math.random()*colors.length)]+';animation-duration:'+(1.2+Math.random()*1.4)+'s;animation-delay:'+(i*30)+'ms;opacity:1;transform-origin:center;border-radius:'+(Math.random()>0.5?'50%':'2px')+'';
+        document.body.appendChild(bit);
+        setTimeout(function(){ try{bit.remove();}catch(e){} }, 3000);
+      })(i);
+    }
+  };
+
+  // ── Tap ripple ──
+  GolazoMascot.prototype._ripple = function(e) {
+    var ripple = document.createElement('div');
+    ripple.className = 'go-tap-ripple';
+    var rect = this.char.getBoundingClientRect();
+    var x = (e && e.clientX) ? e.clientX - rect.left : rect.width/2;
+    var y = (e && e.clientY) ? e.clientY - rect.top  : rect.height/2;
+    ripple.style.left = x+'px';
+    ripple.style.top  = y+'px';
+    this.char.appendChild(ripple);
+    setTimeout(function(){ try{ripple.remove();}catch(er){} }, 650);
+  };
+
+  // ── Scroll tracker ──
+  GolazoMascot.prototype._initScrollTrack = function() {
+    var self = this;
+    var lastScrollY = 0;
+    var scrollTimer = null;
+    var peekTimer = null;
+    window.addEventListener('scroll', function(){
+      var sy = window.scrollY || document.documentElement.scrollTop;
+      clearTimeout(scrollTimer);
+      // peek on fast scroll down
+      if (sy > lastScrollY + 60 && self._minimized) {
+        clearTimeout(peekTimer);
+        self.floater.classList.add('go-peeking');
+        peekTimer = setTimeout(function(){ self.floater.classList.remove('go-peeking'); }, 2200);
+      }
+      lastScrollY = sy;
+      // comment after scroll stops
+      scrollTimer = setTimeout(function(){
+        if (self._state === 'idle' && !self._minimized && Math.random() < 0.22) {
+          var msgs = ['¡Sigue explorando! 🔍','¿Encontraste lo que buscabas? 👀','¡Hay mucho más abajo! ⬇️'];
+          self.say(msgs[Math.floor(Math.random()*msgs.length)], 2200);
+        }
+      }, 1800);
+    }, {passive:true});
+  };
+
   // ── Celebrate ──
   GolazoMascot.prototype.celebrate = function(msg) {
     var self = this;
     this._setState('celebrate');
+    _goSoundCelebrate();
+    _goVibrate([30, 20, 30]);
+    this._confetti();
     // Animate stars
     var st = this.stars;
-    st.style.animation = 'none';
-    st.style.opacity = '1';
-    requestAnimationFrame(function(){
-      st.style.animation = 'go-stars-appear 1.9s ease-out forwards';
-    });
-    if (msg) this.say(msg, 3000);
+    if (st) {
+      st.style.animation = 'none';
+      st.style.opacity = '1';
+      requestAnimationFrame(function(){
+        st.style.animation = 'go-stars-appear 1.9s ease-out forwards';
+      });
+    }
+    if (msg) this.say(msg, 3200);
     clearTimeout(this._stateTimer);
     this._stateTimer = setTimeout(function(){
-      st.style.opacity = '0';
-      st.style.animation = '';
+      if (st) { st.style.opacity = '0'; st.style.animation = ''; }
       if (self._state === 'celebrate') self._setState('idle');
-    }, 2500);
+    }, 2800);
   };
 
   // ── Alert ──
   GolazoMascot.prototype.alert = function(msg) {
     var self = this;
     this._setState('alert');
+    _goSoundAlert();
+    _goVibrate([80]);
     if (msg) this.say(msg, 3000);
     clearTimeout(this._stateTimer);
     this._stateTimer = setTimeout(function(){
@@ -12171,9 +12362,14 @@ function wcMcGol(p){
     this.char.addEventListener('mouseleave', function(){
       if (self._state === 'hover') self._setState('idle');
     });
-    this.char.addEventListener('click', function(){
+    this.char.addEventListener('click', function(e){
       if (self._minimized) return;
+      self._ripple(e);
+      _goSoundPop();
+      _goVibrate([20]);
       self._setState('click');
+      // Check level upgrade on click
+      setTimeout(function(){ self._updateLevel(); }, 300);
       var msg = CLICK_MSGS[Math.floor(Math.random() * CLICK_MSGS.length)];
       self.say(msg, 2800);
       clearTimeout(self._stateTimer);
@@ -12226,6 +12422,7 @@ function wcMcGol(p){
       var msg = msgs[Math.floor(Math.random() * msgs.length)];
       if (['invest_win','levelup','achievement','pack'].indexOf(type) !== -1) {
         self.celebrate(msg);
+        setTimeout(function(){ self._updateLevel(); }, 500);
       } else if (type === 'invest_lose') {
         self.alert(msg);
       } else {

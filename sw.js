@@ -1,7 +1,7 @@
 /* ════════════════════════════════════════════
    WC2026 Service Worker — Cache-first PWA
 ════════════════════════════════════════════ */
-const CACHE = 'wc2026-v1';
+const CACHE = 'wc2026-v4';
 const OFFLINE_URL = './wc2026.html';
 
 const PRECACHE = [

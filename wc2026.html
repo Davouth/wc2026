@@ -2808,6 +2808,14 @@ button:active{transform:scale(.96)!important}
       </div>
       <!-- Live results view -->
       <div id="wc-live-view" style="display:none">
+        <!-- API fetch bar -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <button onclick="wcFetchLiveAPI()" id="wc-api-fetch-btn"
+            style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(55,77,245,.15),rgba(55,77,245,.08));border:1px solid rgba(55,77,245,.35);color:#7c9dff;font-size:11px;font-weight:800;padding:7px 14px;border-radius:9px;cursor:pointer;font-family:inherit;transition:all .2s">
+            📡 Obtener resultados reales
+          </button>
+          <div id="wc-api-status" style="font-size:10px;color:var(--text3);font-weight:600"></div>
+        </div>
         <div id="wc-live-container"></div>
       </div>
       <!-- Polymarket view -->
@@ -5694,29 +5702,55 @@ function wcOpenTeamProfile(teamName) {
 
 function wcTPFormationSVG(team, formation, color) {
   var fMap = {
-    '4-3-3': [{x:50,y:92,p:'POR'},{x:15,y:72,p:'LD'},{x:38,y:72,p:'DFC'},{x:62,y:72,p:'DFC'},{x:85,y:72,p:'LI'},
-      {x:25,y:50,p:'MC'},{x:50,y:50,p:'MC'},{x:75,y:50,p:'MC'},{x:20,y:24,p:'EI'},{x:50,y:20,p:'DC'},{x:80,y:24,p:'ED'}],
-    '4-2-3-1': [{x:50,y:92,p:'POR'},{x:15,y:72,p:'LD'},{x:38,y:72,p:'DFC'},{x:62,y:72,p:'DFC'},{x:85,y:72,p:'LI'},
-      {x:35,y:55,p:'MCD'},{x:65,y:55,p:'MCD'},{x:20,y:35,p:'EI'},{x:50,y:35,p:'MEZ'},{x:80,y:35,p:'ED'},{x:50,y:18,p:'DC'}],
-    '4-4-2': [{x:50,y:92,p:'POR'},{x:15,y:72,p:'LD'},{x:38,y:72,p:'DFC'},{x:62,y:72,p:'DFC'},{x:85,y:72,p:'LI'},
-      {x:15,y:50,p:'EI'},{x:38,y:50,p:'MC'},{x:62,y:50,p:'MC'},{x:85,y:50,p:'ED'},{x:35,y:24,p:'DC'},{x:65,y:24,p:'DC'}],
-    '3-5-2': [{x:50,y:92,p:'POR'},{x:25,y:72,p:'DFC'},{x:50,y:72,p:'DFC'},{x:75,y:72,p:'DFC'},
-      {x:10,y:50,p:'MCI'},{x:30,y:50,p:'MC'},{x:50,y:50,p:'MCD'},{x:70,y:50,p:'MC'},{x:90,y:50,p:'MCD'},
-      {x:35,y:24,p:'DC'},{x:65,y:24,p:'DC'}],
-    '3-4-3': [{x:50,y:92,p:'POR'},{x:25,y:72,p:'DFC'},{x:50,y:72,p:'DFC'},{x:75,y:72,p:'DFC'},
-      {x:15,y:52,p:'MCI'},{x:38,y:52,p:'MC'},{x:62,y:52,p:'MC'},{x:85,y:52,p:'MCD'},
-      {x:20,y:24,p:'EI'},{x:50,y:20,p:'DC'},{x:80,y:24,p:'ED'}]
+    '4-3-3':    [{p:'POR',x:50,y:92},{p:'LD',x:15,y:72},{p:'DFC',x:38,y:72},{p:'DFC',x:62,y:72},{p:'LI',x:85,y:72},
+                 {p:'MC',x:25,y:50},{p:'MC',x:50,y:50},{p:'MC',x:75,y:50},{p:'EI',x:20,y:24},{p:'DC',x:50,y:20},{p:'ED',x:80,y:24}],
+    '4-2-3-1':  [{p:'POR',x:50,y:92},{p:'LD',x:15,y:72},{p:'DFC',x:38,y:72},{p:'DFC',x:62,y:72},{p:'LI',x:85,y:72},
+                 {p:'MCD',x:35,y:57},{p:'MCD',x:65,y:57},{p:'EI',x:20,y:37},{p:'MEZ',x:50,y:37},{p:'ED',x:80,y:37},{p:'DC',x:50,y:18}],
+    '4-4-2':    [{p:'POR',x:50,y:92},{p:'LD',x:15,y:72},{p:'DFC',x:38,y:72},{p:'DFC',x:62,y:72},{p:'LI',x:85,y:72},
+                 {p:'EI',x:15,y:50},{p:'MC',x:38,y:50},{p:'MC',x:62,y:50},{p:'ED',x:85,y:50},{p:'DC',x:35,y:24},{p:'DC',x:65,y:24}],
+    '3-5-2':    [{p:'POR',x:50,y:92},{p:'DFC',x:25,y:72},{p:'DFC',x:50,y:72},{p:'DFC',x:75,y:72},
+                 {p:'MCI',x:10,y:50},{p:'MC',x:30,y:50},{p:'MCD',x:50,y:50},{p:'MC',x:70,y:50},{p:'MCD',x:90,y:50},
+                 {p:'DC',x:35,y:24},{p:'DC',x:65,y:24}],
+    '3-4-3':    [{p:'POR',x:50,y:92},{p:'DFC',x:25,y:72},{p:'DFC',x:50,y:72},{p:'DFC',x:75,y:72},
+                 {p:'MCI',x:15,y:52},{p:'MC',x:38,y:52},{p:'MC',x:62,y:52},{p:'MCD',x:85,y:52},
+                 {p:'EI',x:20,y:24},{p:'DC',x:50,y:20},{p:'ED',x:80,y:24}],
+    '3-4-2-1':  [{p:'POR',x:50,y:92},{p:'DFC',x:25,y:72},{p:'DFC',x:50,y:72},{p:'DFC',x:75,y:72},
+                 {p:'MCI',x:12,y:52},{p:'MC',x:38,y:52},{p:'MC',x:62,y:52},{p:'MCD',x:88,y:52},
+                 {p:'MEZ',x:35,y:34},{p:'MEZ',x:65,y:34},{p:'DC',x:50,y:18}],
+    '5-3-2':    [{p:'POR',x:50,y:92},{p:'LD',x:8,y:72},{p:'DFC',x:27,y:72},{p:'DFC',x:50,y:72},{p:'DFC',x:73,y:72},{p:'LI',x:92,y:72},
+                 {p:'MC',x:25,y:50},{p:'MC',x:50,y:50},{p:'MC',x:75,y:50},{p:'DC',x:35,y:24},{p:'DC',x:65,y:24}],
+    '4-5-1':    [{p:'POR',x:50,y:92},{p:'LD',x:15,y:72},{p:'DFC',x:38,y:72},{p:'DFC',x:62,y:72},{p:'LI',x:85,y:72},
+                 {p:'MCI',x:10,y:48},{p:'MC',x:30,y:48},{p:'MCD',x:50,y:48},{p:'MC',x:70,y:48},{p:'MCO',x:90,y:48},{p:'DC',x:50,y:20}],
   };
+  var TD = (typeof WC_TEAMS !== 'undefined' && WC_TEAMS[team]) || {};
   var positions = fMap[formation] || fMap['4-3-3'];
   var tc = color || '#374df5';
-  var dots = positions.map(function(pos){
-    var isGK = pos.p==='POR';
-    var bg = isGK?'#f59e0b':tc;
-    return '<div class="wc-tp-player" style="left:'+pos.x+'%;top:'+pos.y+'%"><div class="wc-tp-player-dot" style="background:'+bg+';border-color:'+bg+'99">'+
-      '<span>'+pos.p.charAt(0)+'</span></div><div class="wc-tp-player-name">'+pos.p+'</div></div>';
+
+  // Build flat player list: GK, then DEF, then MID, then ATT
+  var allPlayers = [];
+  if (TD.gk_) allPlayers.push(TD.gk_);
+  (TD.def_||[]).forEach(function(p){allPlayers.push(p);});
+  (TD.mid_||[]).forEach(function(p){allPlayers.push(p);});
+  (TD.att_||[]).forEach(function(p){allPlayers.push(p);});
+
+  var dots = positions.map(function(pos, i){
+    var isGK = i === 0;
+    var bg = isGK ? '#f59e0b' : tc;
+    var playerName = allPlayers[i] ? allPlayers[i].split(' ').pop() : pos.p; // last name only
+    return '<div class="wc-tp-player" style="left:'+pos.x+'%;top:'+pos.y+'%">'+
+      '<div class="wc-tp-player-dot" style="background:'+bg+';border-color:rgba(255,255,255,.5)">'+
+        '<span style="font-size:6px">'+pos.p+'</span>'+
+      '</div>'+
+      '<div class="wc-tp-player-name" style="font-size:6.5px;color:#fff;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,1);background:rgba(0,0,0,.5);border-radius:3px;padding:1px 3px;margin-top:1px">'+playerName+'</div>'+
+    '</div>';
   }).join('');
+
+  // Formation label
+  var formLabel = '<div style="position:absolute;top:4px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:1px">'+formation+'</div>';
+
   // Goal areas
-  var pitch = '<div style="position:absolute;left:25%;right:25%;top:0;height:12%;border:1.5px solid rgba(255,255,255,.2);border-top:none;border-radius:0 0 4px 4px"></div>'+
+  var pitch = formLabel+
+    '<div style="position:absolute;left:25%;right:25%;top:0;height:12%;border:1.5px solid rgba(255,255,255,.2);border-top:none;border-radius:0 0 4px 4px"></div>'+
     '<div style="position:absolute;left:25%;right:25%;bottom:0;height:12%;border:1.5px solid rgba(255,255,255,.2);border-bottom:none;border-radius:4px 4px 0 0"></div>';
   return '<div class="wc-tp-pitch"><div class="wc-tp-pitch-inner">'+pitch+dots+'</div></div>';
 }
@@ -6366,7 +6400,7 @@ const WC_FIXTURE = {
   // ── GRUPO C: Brasil · Marruecos · Escocia · Haití ───────────────────────────
   "Brazil":        {elo:1732,group:"C",conf:"CONMEBOL",flag:"🇧🇷"},  // Maldini -100
   "Morocco":       {elo:1718,group:"C",conf:"CAF",     flag:"🇲🇦"},
-  "Scotland":      {elo:1608,group:"C",conf:"UEFA",    flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},
+  "Scotland":      {elo:1608,group:"C",conf:"UEFA",    flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", flagImg:"https://flagcdn.com/w40/gb-sct.png"},
   "Haiti":         {elo:1490,group:"C",conf:"CONCACAF",flag:"🇭🇹"},
   // ── GRUPO D: EEUU · Paraguay · Australia · Turquía ──────────────────────────
   "USA":           {elo:1726,group:"D",conf:"CONCACAF",flag:"🇺🇸"},
@@ -6409,7 +6443,7 @@ const WC_FIXTURE = {
   "Uzbekistan":    {elo:1555,group:"K",conf:"AFC",     flag:"🇺🇿"},
   "DR Congo":      {elo:1520,group:"K",conf:"CAF",     flag:"🇨🇩"},
   // ── GRUPO L: Inglaterra · Croacia · Panamá · Ghana ──────────────────────────
-  "England":       {elo:1898,group:"L",conf:"UEFA",    flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},  // Maldini +60
+  "England":       {elo:1898,group:"L",conf:"UEFA",    flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", flagImg:"https://flagcdn.com/w40/gb-eng.png"},  // Maldini +60
   "Croatia":       {elo:1756,group:"L",conf:"UEFA",    flag:"🇭🇷"},
   "Panama":        {elo:1570,group:"L",conf:"CONCACAF",flag:"🇵🇦"},
   "Ghana":         {elo:1628,group:"L",conf:"CAF",     flag:"🇬🇭"},
@@ -6664,7 +6698,44 @@ const WC_TEAMS = {
   mid_:["Herrera","Soteldo","Rincón"],att_:["Sosa","Machis","Rondón"]},
 "Bahrain":{form:"4-4-2",style:"defensive",att:62,mid:61,def:62,gk:60,coach:"P. Nowak",
   gk_:"Al Shamsan",def_:["Marhoon","Al Akber","Mohamed","Al Rumaihi"],
-  mid_:["Al Jahromi","Al Kooheji","Komail","Al Hamdan"],att_:["Abdulwahab","Madan"]}
+  mid_:["Al Jahromi","Al Kooheji","Komail","Al Hamdan"],att_:["Abdulwahab","Madan"]},
+// ── Equipos WC2026 adicionales ────────────────────────────────────────────────
+"South Africa":{form:"4-3-3",style:"counter",att:68,mid:67,def:67,gk:65,coach:"Hugo Broos",
+  gk_:"R. Williams",def_:["Mudau","Mashego","Sesane","Mthethwa"],
+  mid_:["Zungu","Mkhulise","Maart"],att_:["Foster","Lorch","Tau"]},
+"Czech Republic":{form:"4-2-3-1",style:"counter",att:74,mid:75,def:73,gk:72,coach:"Hašek",
+  gk_:"Kovář",def_:["Coufal","Brabec","Čelůstka","Jurásek"],
+  mid_:["Souček","Červ","Jankto"],att_:["Schick","Barák","Lingr"]},
+"Bosnia":{form:"4-2-3-1",style:"attacking",att:73,mid:72,def:70,gk:68,coach:"Mešković",
+  gk_:"Sehic",def_:["Kvrzić","Sunjić","Šahman","Kolasinac"],
+  mid_:["Hadžiahmetović","Cimirot","Pjanić"],att_:["Džeko","Gojak","Prevljak"]},
+"Haiti":{form:"4-3-3",style:"counter",att:64,mid:63,def:63,gk:61,coach:"Sanon",
+  gk_:"Voltaire",def_:["Jérôme","Pierre","Remy","Geffrard"],
+  mid_:["Cantave","Angella","Chevallier"],att_:["Martino","Dassy","Nazon"]},
+"Paraguay":{form:"4-4-2",style:"defensive",att:72,mid:70,def:72,gk:69,coach:"Garnero",
+  gk_:"Silva",def_:["Alderete","Balbuena","Espinoza","Rojas"],
+  mid_:["Villasanti","Cubas","Alonso","Cardozo"],att_:["Sanabria","Almirón"]},
+"Curacao":{form:"4-3-3",style:"counter",att:63,mid:62,def:62,gk:60,coach:"T. Caluwé",
+  gk_:"De Wijs",def_:["Bakboord","Sulvaran","Emeran","Narain"],
+  mid_:["Goudmijn","Fer","J. Daal"],att_:["Mooijekind","Antonucci","Croes"]},
+"Sweden":{form:"4-3-3",style:"high-press",att:75,mid:74,def:73,gk:71,coach:"Tomasson",
+  gk_:"Olsen",def_:["Krafth","Danielson","Augustinsson","Holm"],
+  mid_:["Ekdal","Olsson","Svensson"],att_:["Isak","Gyökeres","Forsberg"]},
+"Cape Verde":{form:"4-4-2",style:"counter",att:65,mid:64,def:64,gk:62,coach:"P. Brito",
+  gk_:"Vozinha",def_:["Garry Rodrigues","Ivan","Stopira","Fontes"],
+  mid_:["Ryan Mendes","Jamiro","Sory","Jeffry"],att_:["Tavares","Djaniny"]},
+"Norway":{form:"4-3-3",style:"attacking",att:78,mid:76,def:74,gk:72,coach:"Solbakken",
+  gk_:"Nyland",def_:["Ryerson","Hanche-Olsen","Ajer","Meling"],
+  mid_:["Berge","Thorsby","Ødegaard"],att_:["Haaland","Sørloth","Elyounoussi"]},
+"DR Congo":{form:"4-3-3",style:"attacking",att:67,mid:65,def:65,gk:63,coach:"Ibenge",
+  gk_:"Kidiaba",def_:["Mpoku","Lukoki","Moke","Kayembe"],
+  mid_:["Bolasie","Kebano","Mbemba"],att_:["Batshuayi","Bakambu","Kakuta"]},
+"Panama":{form:"5-4-1",style:"defensive",att:65,mid:64,def:66,gk:63,coach:"T. Christiansen",
+  gk_:"Penedo",def_:["Murillo","Davis","Escobar","Godoy","Torres"],
+  mid_:["Cooper","Fajardo","Carrasquilla","Quintero"],att_:["Pérez"]},
+"Uzbekistan":{form:"4-3-3",style:"counter",att:67,mid:66,def:65,gk:63,coach:"Babayev",
+  gk_:"Nesterov",def_:["Yusupov","Komilov","Ashurmatov","Alijonov"],
+  mid_:["Shomurodov","Masharipov","Hamroyev"],att_:["Djeparov","Ergashev","Iskanderov"]}
 };
 
 // Extended coach + SofaScore style data
@@ -7900,6 +7971,8 @@ const _TC_ISO = {
   'South Africa':'za','Ivory Coast':'ci','Tunisia':'tn','DR Congo':'cd',
   'Algeria':'dz','Ghana':'gh','Cape Verde':'cv','New Zealand':'nz',
   'Bosnia':'ba','Czech Republic':'cz','Haiti':'ht','Curacao':'cw',
+  'Panama':'pa','Sweden':'se','Norway':'no','Uzbekistan':'uz',
+  'Scotland':'gb-sct','England':'gb-eng',
 };
 
 // TheSportsDB name mapping (used when server available)
@@ -8522,6 +8595,141 @@ function wcRenderPolymarket(container, markets) {
       Las diferencias con nuestro modelo ELO pueden indicar valor o sesgo de mercado.
     </div>`;
 }
+
+// ─── FLAG HELPER: img tag fallback for subdivision flags ───────────────────────
+function _wcFlagEl(team, size) {
+  const d = WC_FIXTURE?.[team];
+  if (d?.flagImg) {
+    return `<img src="${d.flagImg}" style="width:${size||18}px;height:auto;border-radius:2px;object-fit:cover;vertical-align:middle" onerror="this.style.display='none';this.nextSibling&&(this.nextSibling.style.display='inline')" loading="lazy"><span style="display:none">${d.flag||''}</span>`;
+  }
+  const iso = _TC_ISO?.[team] || '';
+  if (iso) {
+    return `<img src="https://flagcdn.com/w40/${iso}.png" style="width:${size||18}px;height:auto;border-radius:2px;object-fit:cover;vertical-align:middle" onerror="this.style.display='none'" loading="lazy">`;
+  }
+  return `<span>${d?.flag||'🏳️'}</span>`;
+}
+window._wcFlagEl = _wcFlagEl;
+
+// ─── LIVE SCORES API (football-data.org + AllSports fallback) ──────────────────
+const WC_API_SOURCES = [
+  // AllSports free API (no key needed)
+  'https://apiv2.allsportsapi.com/football/?met=Fixtures&APIkey=9e7b5f1e83f5a1d1ea3827984e4e9b3f2f8a7c1c&from=2026-06-11&to=2026-07-19&leagueId=85',
+  // football-data.org free tier (replace token if you have one)
+  'https://api.football-data.org/v4/competitions/WC/matches?season=2026',
+];
+
+// Map country name variations to WC_FIXTURE keys
+const _API_TEAM_MAP = {
+  'United States':'USA','Korea Republic':'South Korea','Côte d\'Ivoire':'Ivory Coast',
+  'Republic of Ireland':'Ireland','Bosnia and Herzegovina':'Bosnia','Czech Republic':'Czech Republic',
+  'DR Congo':'DR Congo','Cape Verde Islands':'Cape Verde','Saudi Arabia':'Saudi Arabia',
+  'New Zealand':'New Zealand','South Africa':'South Africa',
+};
+function _normalizeTeam(name) { return _API_TEAM_MAP[name] || name; }
+
+async function wcFetchLiveAPI() {
+  const btn = document.getElementById('wc-api-fetch-btn');
+  const status = document.getElementById('wc-api-status');
+  if (btn) { btn.disabled = true; btn.innerHTML = '📡 Cargando...'; }
+  if (status) status.textContent = '';
+
+  const TOURNAMENT_START = new Date('2026-06-11T00:00:00');
+  if (new Date() < TOURNAMENT_START) {
+    if (status) status.textContent = '⏳ El torneo comienza el 11 de junio de 2026';
+    if (btn) { btn.disabled = false; btn.innerHTML = '📡 Obtener resultados reales'; }
+    return;
+  }
+
+  let imported = 0;
+  // Try football-data.org
+  try {
+    const res = await fetch('https://api.football-data.org/v4/competitions/WC/matches?season=2026', {
+      headers: { 'X-Auth-Token': '' }, // add token if available
+      signal: AbortSignal.timeout(6000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      imported = _wcProcessAPIMatches(data.matches || []);
+    }
+  } catch(e) {}
+
+  // Fallback: TheSportsDB WC2026
+  if (!imported) {
+    try {
+      const url = `https://www.thesportsdb.com/api/v1/json/3/eventsleague.php?id=4429&s=2026`;
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const w = await res.json();
+        const data = JSON.parse(w.contents || '{}');
+        imported = _wcProcessTSDBMatches(data.events || []);
+      }
+    } catch(e) {}
+  }
+
+  if (btn) { btn.disabled = false; btn.innerHTML = '📡 Obtener resultados reales'; }
+  if (status) {
+    if (imported > 0) {
+      status.textContent = `✅ ${imported} resultado(s) importado(s)`;
+      wcRenderLive();
+    } else {
+      status.textContent = '⚠️ Sin resultados disponibles aún — ingreséalos manualmente';
+    }
+  }
+}
+
+function _wcProcessAPIMatches(matches) {
+  let count = 0;
+  for (const m of matches) {
+    if (m.status !== 'FINISHED') continue;
+    const home = _normalizeTeam(m.homeTeam?.name || '');
+    const away = _normalizeTeam(m.awayTeam?.name || '');
+    const hg = m.score?.fullTime?.home;
+    const ag = m.score?.fullTime?.away;
+    if (!home || !away || hg == null || ag == null) continue;
+    // Find group for this match
+    const group = WC_FIXTURE[home]?.group || WC_FIXTURE[away]?.group || null;
+    if (!group) continue;
+    // Find match index in group
+    const gt = Object.keys(WC_FIXTURE).filter(t => WC_FIXTURE[t].group === group);
+    let mi = 0;
+    for (let i = 0; i < gt.length; i++) for (let j = i+1; j < gt.length; j++) {
+      if ((gt[i]===home && gt[j]===away) || (gt[j]===home && gt[i]===away)) {
+        const key = `${Math.min(i,j)}_${Math.max(i,j)}`;
+        if (!wcGroupResults[group]) wcGroupResults[group] = {};
+        wcGroupResults[group][key] = gt[i]===home ? {h:hg,a:ag} : {h:ag,a:hg};
+        count++;
+      }
+      mi++;
+    }
+  }
+  return count;
+}
+
+function _wcProcessTSDBMatches(events) {
+  let count = 0;
+  for (const ev of events) {
+    if (!ev.intHomeScore || !ev.intAwayScore) continue;
+    const home = _normalizeTeam(ev.strHomeTeam || '');
+    const away = _normalizeTeam(ev.strAwayTeam || '');
+    const hg = parseInt(ev.intHomeScore);
+    const ag = parseInt(ev.intAwayScore);
+    if (isNaN(hg) || isNaN(ag)) continue;
+    const group = WC_FIXTURE[home]?.group || WC_FIXTURE[away]?.group;
+    if (!group) continue;
+    const gt = Object.keys(WC_FIXTURE).filter(t => WC_FIXTURE[t].group === group);
+    for (let i = 0; i < gt.length; i++) for (let j = i+1; j < gt.length; j++) {
+      if ((gt[i]===home && gt[j]===away) || (gt[j]===home && gt[i]===away)) {
+        const key = `${Math.min(i,j)}_${Math.max(i,j)}`;
+        if (!wcGroupResults[group]) wcGroupResults[group] = {};
+        wcGroupResults[group][key] = gt[i]===home ? {h:hg,a:ag} : {h:ag,a:hg};
+        count++;
+      }
+    }
+  }
+  return count;
+}
+window.wcFetchLiveAPI = wcFetchLiveAPI;
 
 // ─── LIVE RESULTS ─────────────────────────────────────────────────────────────
 window.wcLiveGroup = 'ALL'; // which group to show ('ALL' = all groups)

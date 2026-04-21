@@ -11832,241 +11832,181 @@ function wcMcGol(p){
     <!-- Speech bubble -->
     <div id="go-bubble" class="go-bubble"><span id="go-bubble-txt"></span></div>
     <!-- SVG Character — ZAZU el Jaguar 🐆 WC2026 -->
-    <svg id="go-svg" viewBox="0 0 120 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block" aria-label="Zazu mascota jaguar WC2026">
+    <svg id="go-svg" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block" aria-label="Zazu mascota WC2026">
       <defs>
-        <!-- Fur principal: naranja/dorado -->
-        <radialGradient id="ggH" cx="38%" cy="32%" r="68%">
-          <stop offset="0%" stop-color="#FFB828"/>
-          <stop offset="100%" stop-color="#C87010"/>
+        <!-- Body gradient: deep blue kit -->
+        <linearGradient id="gKit" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1e3a8a"/>
+          <stop offset="100%" stop-color="#1d4ed8"/>
+        </linearGradient>
+        <!-- Skin tone -->
+        <radialGradient id="gSkin" cx="40%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#fde68a"/>
+          <stop offset="100%" stop-color="#f59e0b"/>
         </radialGradient>
-        <!-- Hocico/panza: crema -->
-        <radialGradient id="ggMuz" cx="50%" cy="40%" r="70%">
-          <stop offset="0%" stop-color="#FFF2C8"/>
-          <stop offset="100%" stop-color="#F0D888"/>
+        <!-- Head gradient -->
+        <radialGradient id="gHead" cx="38%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#fef3c7"/>
+          <stop offset="60%" stop-color="#fcd34d"/>
+          <stop offset="100%" stop-color="#d97706"/>
         </radialGradient>
-        <!-- Jersey: verde México -->
-        <radialGradient id="ggB" cx="30%" cy="20%" r="72%">
-          <stop offset="0%" stop-color="#009A50"/>
-          <stop offset="100%" stop-color="#005A2A"/>
-        </radialGradient>
-        <!-- Ojos: verde brillante (ojos de jaguar) -->
-        <radialGradient id="ggE" cx="28%" cy="24%" r="72%">
-          <stop offset="0%" stop-color="#28D848"/>
-          <stop offset="100%" stop-color="#065818"/>
-        </radialGradient>
-        <!-- Sombra suave ambar -->
-        <filter id="ggDrop" x="-28%" y="-18%" width="156%" height="156%">
-          <feDropShadow dx="0" dy="5" stdDeviation="5.5" flood-color="#804000" flood-opacity="0.28"/>
+        <!-- Glow filter -->
+        <filter id="gGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+          <feFlood flood-color="#f59e0b" flood-opacity="0.5" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="glow"/>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <!-- Glow dorado para nariz/detalles -->
-        <filter id="ggGlow" x="-130%" y="-130%" width="360%" height="360%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="2.8" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        <!-- Shadow -->
+        <filter id="gShadow">
+          <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000" flood-opacity="0.35"/>
+        </filter>
+        <!-- Stars group -->
+        <filter id="gStarGlow">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+          <feFlood flood-color="#fbbf24" flood-opacity="0.9"/>
+          <feComposite in2="SourceAlpha" operator="in"/>
+          <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
       </defs>
 
-      <!-- Sombra en el piso -->
-      <ellipse id="goFloorShadow" cx="60" cy="163" rx="30" ry="5.5" fill="rgba(80,36,0,.2)"/>
+      <!-- ── SHADOW ── -->
+      <ellipse id="goFloorShadow" cx="60" cy="173" rx="28" ry="6" fill="rgba(0,0,0,0.18)"/>
 
-      <!-- COLA (detrás del cuerpo) -->
-      <path d="M86,132 C102,128 114,118 112,106 C110,96 100,98 100,110"
-            stroke="#F0A018" stroke-width="10" stroke-linecap="round" fill="none"/>
-      <path d="M86,132 C102,128 114,118 112,106 C110,96 100,98 100,110"
-            stroke="#C07810" stroke-width="3" stroke-linecap="round" fill="none"/>
-      <!-- Manchas en la cola -->
-      <ellipse cx="110" cy="107" rx="4.5" ry="3" fill="#180C02" opacity="0.58" transform="rotate(-25,110,107)"/>
-      <ellipse cx="112" cy="118" rx="4" ry="3" fill="#180C02" opacity="0.5" transform="rotate(-10,112,118)"/>
-      <ellipse cx="104" cy="127" rx="3.5" ry="2.5" fill="#180C02" opacity="0.42"/>
-
-      <!-- BRAZO IZQUIERDO (origen hombro 28,93) -->
-      <g id="goArmL">
-        <path d="M28,93 C16,97 8,107 7,116" stroke="#F0A018" stroke-width="13" stroke-linecap="round" fill="none"/>
-        <path d="M28,93 C16,97 8,107 7,116" stroke="rgba(255,220,120,.18)" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <!-- Pata/garra -->
-        <circle cx="7" cy="117" r="8.5" fill="#F0A018"/>
-        <ellipse cx="2"  cy="112" rx="2.8" ry="3.8" fill="#D08010" transform="rotate(-18,2,112)"/>
-        <ellipse cx="7"  cy="110" rx="2.8" ry="3.8" fill="#D08010"/>
-        <ellipse cx="13" cy="112" rx="2.8" ry="3.8" fill="#D08010" transform="rotate(18,13,112)"/>
-        <!-- Manchas en brazo -->
-        <ellipse cx="16" cy="100" rx="3.5" ry="2.8" fill="#180C02" opacity="0.35" transform="rotate(-20,16,100)"/>
+      <!-- ── LEGS ── -->
+      <g id="goLegs">
+        <!-- Left leg -->
+        <rect x="36" y="128" width="18" height="32" rx="9" fill="#1e40af"/>
+        <!-- Left boot -->
+        <ellipse cx="41" cy="160" rx="13" ry="8" fill="#0f172a"/>
+        <ellipse cx="39" cy="158" rx="8" ry="4" fill="#334155" opacity="0.6"/>
+        <!-- Right leg -->
+        <rect x="66" y="128" width="18" height="32" rx="9" fill="#1e40af"/>
+        <!-- Right boot -->
+        <ellipse cx="79" cy="160" rx="13" ry="8" fill="#0f172a"/>
+        <ellipse cx="77" cy="158" rx="8" ry="4" fill="#334155" opacity="0.6"/>
       </g>
 
-      <!-- BRAZO DERECHO (origen hombro 92,93) -->
-      <g id="goArmR">
-        <path d="M92,93 C104,97 112,107 113,116" stroke="#F0A018" stroke-width="13" stroke-linecap="round" fill="none"/>
-        <path d="M92,93 C104,97 112,107 113,116" stroke="rgba(255,220,120,.18)" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <!-- Pata/garra -->
-        <circle cx="113" cy="117" r="8.5" fill="#F0A018"/>
-        <ellipse cx="108" cy="112" rx="2.8" ry="3.8" fill="#D08010" transform="rotate(-18,108,112)"/>
-        <ellipse cx="113" cy="110" rx="2.8" ry="3.8" fill="#D08010"/>
-        <ellipse cx="118" cy="112" rx="2.8" ry="3.8" fill="#D08010" transform="rotate(18,118,112)"/>
-        <ellipse cx="104" cy="100" rx="3.5" ry="2.8" fill="#180C02" opacity="0.35" transform="rotate(20,104,100)"/>
+      <!-- ── BODY (jersey) ── -->
+      <g id="goBody" style="transform-origin:60px 115px">
+        <!-- Main torso -->
+        <rect x="28" y="88" width="64" height="48" rx="20" fill="url(#gKit)" filter="url(#gShadow)"/>
+        <!-- Jersey collar -->
+        <path d="M46,88 Q60,100 74,88" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+        <!-- Jersey number -->
+        <text x="60" y="120" text-anchor="middle" dominant-baseline="middle"
+              font-family="'Arial Black',Arial,sans-serif" font-size="22" font-weight="900"
+              fill="rgba(255,255,255,0.95)" filter="url(#gShadow)">26</text>
+        <!-- Shoulder shine -->
+        <ellipse cx="42" cy="94" rx="10" ry="5" fill="rgba(255,255,255,0.15)" transform="rotate(-15,42,94)"/>
+        <!-- Kit stripe -->
+        <rect x="28" y="104" width="64" height="5" rx="2" fill="rgba(251,191,36,0.35)"/>
       </g>
 
-      <!-- CUERPO — jersey verde México (origen respiración 60,120) -->
-      <g id="goBody" style="transform-origin:60px 120px">
-        <rect x="26" y="88" width="68" height="68" rx="18" fill="url(#ggB)"/>
-        <!-- Franja blanca central -->
-        <rect x="46" y="88" width="28" height="68" fill="rgba(255,255,255,.09)"/>
-        <!-- Franja roja horizontal -->
-        <rect x="26" y="106" width="68" height="6" fill="#CE1126" opacity="0.75"/>
-        <!-- Cuello V -->
-        <path d="M44,88 L60,105 L76,88" fill="#005A2A" stroke="#003E1A" stroke-width="1.2"/>
-        <!-- Texto jersey -->
-        <text x="60" y="118" text-anchor="middle" dominant-baseline="middle"
-              font-family="'Arial Black',Arial,sans-serif" font-size="6" font-weight="900"
-              fill="#FFD700" opacity=".7">🐆 WC2026</text>
-        <text x="60" y="135" text-anchor="middle" dominant-baseline="middle"
-              font-family="'Arial Black',Arial,sans-serif" font-size="21" font-weight="900"
-              fill="#FFD700" opacity=".95">MX</text>
-        <!-- Brillo hombro -->
-        <ellipse cx="44" cy="93" rx="10" ry="5" fill="rgba(255,255,255,.16)" transform="rotate(-18,44,93)"/>
-        <!-- Manchas de jaguar en jersey (abdomen) -->
-        <ellipse cx="44" cy="144" rx="5" ry="4" fill="#180C02" opacity="0.16"/>
-        <ellipse cx="60" cy="148" rx="4.5" ry="3.5" fill="#180C02" opacity="0.14"/>
-        <ellipse cx="76" cy="144" rx="5" ry="4" fill="#180C02" opacity="0.16"/>
-        <!-- Pantaloncillo oscuro -->
-        <rect x="30" y="148" width="22" height="9" rx="5" fill="#004020"/>
-        <rect x="68" y="148" width="22" height="9" rx="5" fill="#004020"/>
-        <!-- Botines rojos (colores México) -->
-        <rect x="24" y="154" width="30" height="9" rx="5" fill="#CE1126"/>
-        <rect x="66" y="154" width="30" height="9" rx="5" fill="#CE1126"/>
-        <rect x="26" y="155" width="26" height="3" rx="2" fill="rgba(255,255,255,.22)"/>
-        <rect x="68" y="155" width="26" height="3" rx="2" fill="rgba(255,255,255,.22)"/>
+      <!-- ── ARM LEFT ── -->
+      <g id="goArmL" style="transform-origin:32px 95px">
+        <path d="M32,95 C18,102 12,118 14,128" stroke="#1d4ed8" stroke-width="14" stroke-linecap="round" fill="none"/>
+        <!-- Hand -->
+        <circle cx="14" cy="130" r="10" fill="url(#gSkin)"/>
+        <!-- Thumb -->
+        <ellipse cx="6" cy="126" rx="5" ry="4" fill="#fcd34d" transform="rotate(-30,6,126)"/>
       </g>
 
-      <!-- CABEZA JAGUAR (origen bamboleo 60,50) -->
-      <g id="goHead" style="transform-origin:60px 50px">
-        <!-- OREJAS PUNTIAGUDAS -->
-        <!-- Oreja izquierda exterior -->
-        <path d="M26,30 L14,6 L42,22 Z" fill="#F0A018"/>
-        <path d="M26,30 L14,6 L42,22 Z" fill="none" stroke="#C07010" stroke-width="1.2"/>
-        <!-- Oreja izquierda interior (pelaje claro) -->
-        <path d="M28,28 L18,10 L40,21 Z" fill="#F8D8A0"/>
-        <!-- Oreja derecha exterior -->
-        <path d="M94,30 L106,6 L78,22 Z" fill="#F0A018"/>
-        <path d="M94,30 L106,6 L78,22 Z" fill="none" stroke="#C07010" stroke-width="1.2"/>
-        <!-- Oreja derecha interior -->
-        <path d="M92,28 L102,10 L80,21 Z" fill="#F8D8A0"/>
-        <!-- Manchas en orejas -->
-        <ellipse cx="22" cy="14" rx="3" ry="4" fill="#180C02" opacity="0.4" transform="rotate(-15,22,14)"/>
-        <ellipse cx="98" cy="14" rx="3" ry="4" fill="#180C02" opacity="0.4" transform="rotate(15,98,14)"/>
+      <!-- ── ARM RIGHT ── -->
+      <g id="goArmR" style="transform-origin:88px 95px">
+        <path d="M88,95 C102,102 108,118 106,128" stroke="#1d4ed8" stroke-width="14" stroke-linecap="round" fill="none"/>
+        <!-- Hand / football -->
+        <circle cx="106" cy="130" r="11" fill="#f8fafc" stroke="#1e293b" stroke-width="1.5"/>
+        <!-- Football pattern -->
+        <path d="M106,120 Q112,125 110,132 Q104,137 100,133 Q98,127 102,122 Z" fill="#1e293b" opacity="0.85"/>
+        <path d="M106,120 Q100,122 98,128 Q101,134 106,136 Q111,133 112,127 Z" fill="#1e293b" opacity="0.85"/>
+      </g>
 
-        <!-- Cabeza principal -->
-        <ellipse cx="60" cy="52" rx="42" ry="42" fill="url(#ggH)" filter="url(#ggDrop)"/>
-        <ellipse cx="60" cy="52" rx="42" ry="42" fill="none" stroke="#C07008" stroke-width="1.2"/>
+      <!-- ── HEAD ── -->
+      <g id="goHead" style="transform-origin:60px 55px">
+        <!-- Neck -->
+        <rect x="50" y="80" width="20" height="14" rx="8" fill="#fcd34d"/>
 
-        <!-- MANCHAS DE JAGUAR en la frente -->
-        <!-- Rosetas (patrón real de jaguar) -->
-        <ellipse cx="43" cy="26" rx="6" ry="5" fill="#180C02" opacity="0.65"/>
-        <ellipse cx="44" cy="26" rx="3.5" ry="2.8" fill="#F0A018" opacity="0.8"/>
-        <ellipse cx="60" cy="20" rx="5.5" ry="4.5" fill="#180C02" opacity="0.62"/>
-        <ellipse cx="60" cy="20" rx="3" ry="2.5" fill="#F0A018" opacity="0.8"/>
-        <ellipse cx="77" cy="26" rx="6" ry="5" fill="#180C02" opacity="0.65"/>
-        <ellipse cx="77" cy="26" rx="3.5" ry="2.8" fill="#F0A018" opacity="0.8"/>
-        <!-- Manchas laterales -->
-        <ellipse cx="30" cy="42" rx="5" ry="4" fill="#180C02" opacity="0.5"/>
-        <ellipse cx="31" cy="42" rx="2.8" ry="2.2" fill="#F0A018" opacity="0.75"/>
-        <ellipse cx="90" cy="42" rx="5" ry="4" fill="#180C02" opacity="0.5"/>
-        <ellipse cx="89" cy="42" rx="2.8" ry="2.2" fill="#F0A018" opacity="0.75"/>
-        <!-- Líneas negras faciales de jaguar (rayas bajo ojos) -->
-        <path d="M26,50 Q32,46 37,52" stroke="#180C02" stroke-width="2.8" fill="none" stroke-linecap="round" opacity="0.65"/>
-        <path d="M94,50 Q88,46 83,52" stroke="#180C02" stroke-width="2.8" fill="none" stroke-linecap="round" opacity="0.65"/>
+        <!-- EARS -->
+        <ellipse cx="22" cy="42" rx="13" ry="16" fill="#fcd34d" transform="rotate(-15,22,42)"/>
+        <ellipse cx="22" cy="42" rx="8" ry="10" fill="#fde68a" transform="rotate(-15,22,42)"/>
+        <ellipse cx="98" cy="42" rx="13" ry="16" fill="#fcd34d" transform="rotate(15,98,42)"/>
+        <ellipse cx="98" cy="42" rx="8" ry="10" fill="#fde68a" transform="rotate(15,98,42)"/>
 
-        <!-- HOCICO (área crema más clara) -->
-        <ellipse cx="60" cy="67" rx="23" ry="16" fill="url(#ggMuz)"/>
-        <ellipse cx="60" cy="67" rx="23" ry="16" fill="none" stroke="#D4B060" stroke-width="0.8"/>
+        <!-- HEAD main -->
+        <ellipse cx="60" cy="55" rx="40" ry="40" fill="url(#gHead)" filter="url(#gShadow)"/>
+        <!-- Muzzle -->
+        <ellipse cx="60" cy="68" rx="18" ry="13" fill="#fef9c3"/>
+        <!-- Muzzle dots -->
+        <circle cx="52" cy="66" r="1.8" fill="#d97706" opacity="0.5"/>
+        <circle cx="55" cy="70" r="1.8" fill="#d97706" opacity="0.5"/>
+        <circle cx="65" cy="66" r="1.8" fill="#d97706" opacity="0.5"/>
+        <circle cx="68" cy="70" r="1.8" fill="#d97706" opacity="0.5"/>
 
-        <!-- OJO IZQUIERDO (centro 41,50) -->
-        <g id="goEyeL">
-          <ellipse cx="41" cy="50" rx="13" ry="13.5" fill="white"/>
-          <ellipse cx="41" cy="50" rx="13" ry="13.5" fill="none" stroke="#D8C080" stroke-width="0.8"/>
-          <g id="goPupilL">
-            <circle cx="43" cy="51" r="9" fill="url(#ggE)"/>
-            <!-- Pupila vertical (ojo de gato/jaguar) -->
-            <ellipse cx="43" cy="51" rx="3.2" ry="8.2" fill="#060A06"/>
-            <ellipse cx="44.5" cy="47" r="2.8" fill="rgba(255,255,255,.72)"/>
-            <ellipse cx="41"   cy="55" r="1.2" fill="rgba(255,255,255,.38)"/>
-          </g>
+        <!-- Jaguar forehead spots -->
+        <ellipse cx="48" cy="44" rx="5" ry="4" fill="#92400e" opacity="0.4" transform="rotate(-10,48,44)"/>
+        <ellipse cx="60" cy="38" rx="4" ry="5" fill="#92400e" opacity="0.35"/>
+        <ellipse cx="72" cy="44" rx="5" ry="4" fill="#92400e" opacity="0.4" transform="rotate(10,72,44)"/>
+        <!-- Cheek spots -->
+        <ellipse cx="28" cy="56" rx="6" ry="5" fill="#92400e" opacity="0.3" transform="rotate(-20,28,56)"/>
+        <ellipse cx="92" cy="56" rx="6" ry="5" fill="#92400e" opacity="0.3" transform="rotate(20,92,56)"/>
+
+        <!-- EYES -->
+        <!-- Eye whites -->
+        <ellipse cx="44" cy="52" rx="11" ry="11" fill="#fff"/>
+        <ellipse cx="76" cy="52" rx="11" ry="11" fill="#fff"/>
+        <!-- Iris left -->
+        <circle id="goPupilL" cx="44" cy="52" r="7" fill="#1d4ed8"/>
+        <circle cx="44" cy="52" r="4.5" fill="#172554"/>
+        <circle cx="46" cy="50" r="2" fill="rgba(255,255,255,0.8)"/>
+        <!-- Iris right -->
+        <circle id="goPupilR" cx="76" cy="52" r="7" fill="#1d4ed8"/>
+        <circle cx="76" cy="52" r="4.5" fill="#172554"/>
+        <circle cx="78" cy="50" r="2" fill="rgba(255,255,255,0.8)"/>
+        <!-- Blink lids -->
+        <ellipse id="goLidL" cx="44" cy="52" rx="11" ry="11" fill="#fcd34d" transform="scaleY(0)" style="transform-origin:44px 41px"/>
+        <ellipse id="goLidR" cx="76" cy="52" rx="11" ry="11" fill="#fcd34d" transform="scaleY(0)" style="transform-origin:76px 41px"/>
+
+        <!-- EYEBROWS -->
+        <path id="goBrowL" d="M33,40 Q44,33 55,38" stroke="#92400e" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path id="goBrowR" d="M65,38 Q76,33 87,40" stroke="#92400e" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+        <!-- NOSE -->
+        <ellipse cx="60" cy="63" rx="5" ry="3.5" fill="#92400e"/>
+        <ellipse cx="58" cy="62" rx="2" ry="1.5" fill="rgba(255,255,255,0.25)"/>
+
+        <!-- MOUTH expressions -->
+        <!-- Smile (default) -->
+        <path id="goSmile" d="M50,73 Q60,82 70,73" stroke="#92400e" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <!-- Open mouth (speaking) -->
+        <ellipse id="goMouthO" cx="60" cy="76" rx="9" ry="7" fill="#7f1d1d" display="none"/>
+        <path id="goMouthO2" d="M51,74 Q60,72 69,74" stroke="#fef9c3" stroke-width="2" fill="none" display="none"/>
+        <!-- Frown (alert) -->
+        <path id="goFrown" d="M50,79 Q60,72 70,79" stroke="#92400e" stroke-width="3" stroke-linecap="round" fill="none" display="none"/>
+
+        <!-- Sweat drop (for alert) -->
+        <g id="goSweat" opacity="0">
+          <ellipse cx="88" cy="38" rx="4" ry="6" fill="#bfdbfe" transform="rotate(15,88,38)"/>
+          <ellipse cx="87" cy="36" rx="2" ry="2" fill="rgba(255,255,255,0.5)"/>
         </g>
-        <!-- Párpado izquierdo (parpadeo) — color fur -->
-        <rect id="goLidL" x="28" y="36.5" width="26" height="27" rx="13"
-              fill="#F0A018" style="transform:scaleY(0);transform-origin:41px 50px"/>
 
-        <!-- OJO DERECHO (centro 79,50) -->
-        <g id="goEyeR">
-          <ellipse cx="79" cy="50" rx="13" ry="13.5" fill="white"/>
-          <ellipse cx="79" cy="50" rx="13" ry="13.5" fill="none" stroke="#D8C080" stroke-width="0.8"/>
-          <g id="goPupilR">
-            <circle cx="81" cy="51" r="9" fill="url(#ggE)"/>
-            <!-- Pupila vertical -->
-            <ellipse cx="81" cy="51" rx="3.2" ry="8.2" fill="#060A06"/>
-            <ellipse cx="82.5" cy="47" r="2.8" fill="rgba(255,255,255,.72)"/>
-            <ellipse cx="79"   cy="55" r="1.2" fill="rgba(255,255,255,.38)"/>
-          </g>
-        </g>
-        <!-- Párpado derecho -->
-        <rect id="goLidR" x="66" y="36.5" width="26" height="27" rx="13"
-              fill="#F0A018" style="transform:scaleY(0);transform-origin:79px 50px"/>
+        <!-- Helmet / headband WC2026 -->
+        <path d="M20,52 Q60,15 100,52" stroke="#f59e0b" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <circle cx="60" cy="22" r="8" fill="#f59e0b"/>
+        <text x="60" y="26" text-anchor="middle" dominant-baseline="middle" font-size="8" font-weight="900" fill="#1e3a8a">26</text>
 
-        <!-- CEJAS (espesas, de jaguar) -->
-        <path id="goBrowL" d="M28,36 Q41,27 54,34" stroke="#180C02" stroke-width="4" fill="none" stroke-linecap="round"/>
-        <path id="goBrowR" d="M66,34 Q79,27 92,36" stroke="#180C02" stroke-width="4" fill="none" stroke-linecap="round"/>
-
-        <!-- NARIZ triangular de jaguar -->
-        <path d="M52,59 Q60,56 68,59 L64,65 Q60,68 56,65 Z" fill="#C03040"/>
-        <path d="M52,59 Q60,56 68,59" fill="none" stroke="#8B1020" stroke-width="0.8"/>
-        <!-- Brillo nariz -->
-        <ellipse cx="56" cy="60" rx="2.2" ry="1.5" fill="rgba(255,255,255,.38)"/>
-
-        <!-- BIGOTES — puntos -->
-        <circle cx="44" cy="68" r="2.2" fill="#8B6030" opacity="0.85"/>
-        <circle cx="50" cy="70" r="2.2" fill="#8B6030" opacity="0.85"/>
-        <circle cx="70" cy="70" r="2.2" fill="#8B6030" opacity="0.85"/>
-        <circle cx="76" cy="68" r="2.2" fill="#8B6030" opacity="0.85"/>
-        <!-- BIGOTES — líneas -->
-        <line x1="22" y1="64" x2="50" y2="68" stroke="#E0C878" stroke-width="1.2" opacity="0.72"/>
-        <line x1="22" y1="70" x2="50" y2="70" stroke="#E0C878" stroke-width="1.2" opacity="0.72"/>
-        <line x1="22" y1="76" x2="50" y2="72" stroke="#E0C878" stroke-width="1.0" opacity="0.55"/>
-        <line x1="98" y1="64" x2="70" y2="68" stroke="#E0C878" stroke-width="1.2" opacity="0.72"/>
-        <line x1="98" y1="70" x2="70" y2="70" stroke="#E0C878" stroke-width="1.2" opacity="0.72"/>
-        <line x1="98" y1="76" x2="70" y2="72" stroke="#E0C878" stroke-width="1.0" opacity="0.55"/>
-
-        <!-- BOCA — expresiones (JS-toggled) -->
-        <path id="goSmile" d="M46,75 Q60,88 74,75" stroke="#8B4030" stroke-width="2.6"
-              fill="rgba(255,140,100,.2)" stroke-linecap="round"/>
-        <ellipse id="goMouthO" cx="60" cy="78" rx="10" ry="6.5"
-                 fill="#180802" stroke="#8B4030" stroke-width="1.5" style="display:none"/>
-        <ellipse id="goMouthO2" cx="60" cy="77" rx="8" ry="3"
-                 fill="rgba(255,138,100,.6)" style="display:none"/>
-        <path id="goFrown" d="M46,79 Q60,74 74,79" stroke="#8B4030" stroke-width="2.6"
-              fill="none" stroke-linecap="round" style="display:none"/>
-
-        <!-- BANDA WC2026 (verde México con rojo y dorado) -->
-        <path d="M18,33 Q60,18 102,33" fill="none" stroke="#006847" stroke-width="6"/>
-        <path d="M18,33 Q60,18 102,33" fill="none" stroke="#CE1126" stroke-width="2.2"/>
-        <text x="60" y="26" text-anchor="middle" dominant-baseline="middle"
-              font-family="'Arial Black',Arial,sans-serif" font-size="6.5" font-weight="900"
-              fill="#FFD700">WC 2026</text>
-
-        <!-- ETIQUETA DE OREJA (reemplaza antena — origen de animación) -->
+        <!-- Antenna/hair spike -->
         <g id="goAntenna">
-          <!-- Cininta -->
-          <path d="M18,16 L14,5 L24,10 Z" fill="#006847" stroke="#004020" stroke-width="0.8"/>
-          <!-- Bolita dorada en la etiqueta -->
-          <circle cx="17" cy="5" r="5" fill="#FFD700" filter="url(#ggGlow)"/>
-          <circle cx="17" cy="5" r="2.8" fill="white"/>
-          <circle cx="16" cy="4"  r="1.2" fill="rgba(255,240,100,.7)"/>
+          <path d="M60,16 C56,8 58,2 60,0 C62,2 64,8 60,16" fill="#f59e0b"/>
+          <circle cx="60" cy="0" r="4" fill="#fbbf24"/>
         </g>
       </g>
 
-      <!-- ESTRELLAS de celebración (JS-controlled) -->
-      <g id="goStars" style="opacity:0;pointer-events:none">
-        <text x="6"   y="45" font-size="17">⭐</text>
-        <text x="97"  y="40" font-size="14">✨</text>
-        <text x="4"   y="82" font-size="12">⭐</text>
-        <text x="103" y="80" font-size="12">✨</text>
-        <text x="50"  y="3"  font-size="13">🌟</text>
+      <!-- STARS (celebrate) -->
+      <g id="goStars" opacity="0">
+        <text x="20" y="30" font-size="16" filter="url(#gStarGlow)">⭐</text>
+        <text x="82" y="22" font-size="14" filter="url(#gStarGlow)">✨</text>
+        <text x="50" y="10" font-size="18" filter="url(#gStarGlow)">🌟</text>
       </g>
     </svg>
   </div>

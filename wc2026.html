@@ -2166,19 +2166,34 @@ button:active{transform:scale(.96)!important}
 .wc-auth-close{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
 .wc-auth-err{background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.3);color:#f87171;font-size:11px;padding:8px 12px;border-radius:8px;margin-bottom:10px;display:none}
 /* Premium upgrade modal */
-.wc-premium-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:15000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);animation:wqFadeIn .22s ease}
-.wc-premium-sheet{background:var(--surface);border-radius:20px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6)}
-.wc-premium-hero{background:linear-gradient(135deg,#1a0a3a,#2d1060);padding:24px;text-align:center;border-bottom:1px solid rgba(139,92,246,.2)}
-.wc-prem-badge{display:inline-block;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;font-size:10px;font-weight:900;padding:3px 10px;border-radius:20px;letter-spacing:.5px;margin-bottom:10px}
-.wc-premium-features{padding:16px 20px}
-.wc-prem-feat{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;font-weight:600}
-.wc-prem-feat:last-child{border-bottom:none}
-.wc-prem-feat-icon{font-size:18px;width:28px;flex-shrink:0}
-.wc-premium-footer{padding:16px 20px 20px}
+.wc-premium-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:15000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(12px);animation:wqFadeIn .22s ease}
+.wc-premium-sheet{background:#0f1336;border-radius:24px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 32px 100px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.07)}
+.wc-premium-hero{background:linear-gradient(160deg,#0d0620 0%,#1a0a3a 50%,#0f1336 100%);padding:28px 24px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);position:relative}
+.wc-prem-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#c9a227,#f5d062);color:#000;font-size:9px;font-weight:900;padding:4px 12px;border-radius:20px;letter-spacing:1.5px;margin-bottom:10px;text-transform:uppercase}
+/* Tier comparison grid */
+.wc-tier-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0}
+.wc-tier-col{padding:16px 14px}
+.wc-tier-col.hincha{border-right:1px solid rgba(255,255,255,.06)}
+.wc-tier-col.elite{background:linear-gradient(160deg,rgba(55,77,245,.08),rgba(139,92,246,.05))}
+.wc-tier-label{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.wc-tier-label.hincha{color:#556}
+.wc-tier-label.elite{color:#f5d062}
+.wc-tier-name{font-size:18px;font-weight:900;margin-bottom:2px}
+.wc-tier-name.hincha{color:#8899bb}
+.wc-tier-name.elite{background:linear-gradient(135deg,#c9a227,#f5d062);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.wc-tier-price{font-size:11px;color:#445;margin-bottom:12px}
+.wc-tier-price.elite{color:#8899bb}
+.wc-tier-row{display:flex;align-items:center;gap:6px;font-size:11px;padding:5px 0;color:#8899bb;border-bottom:1px solid rgba(255,255,255,.04)}
+.wc-tier-row:last-child{border-bottom:none}
+.wc-tier-row .ck{font-size:10px;flex-shrink:0}
+.wc-tier-row .ck.yes{color:#4ade80}
+.wc-tier-row .ck.no{color:#334;opacity:.6}
+.wc-tier-row.elite-row{color:#ccd}
+.wc-premium-footer{padding:16px 20px 20px;border-top:1px solid rgba(255,255,255,.06)}
 .wc-prem-price{text-align:center;margin-bottom:14px}
-.wc-prem-price-main{font-size:32px;font-weight:900;color:var(--yellow)}
+.wc-prem-price-main{font-size:32px;font-weight:900;color:#f5d062}
 .wc-prem-price-sub{font-size:11px;color:var(--text2)}
-.wc-prem-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:8px;transition:transform .12s}
+.wc-prem-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#c9a227,#f5d062);color:#000;font-family:inherit;font-size:14px;font-weight:900;cursor:pointer;margin-bottom:8px;transition:transform .12s;letter-spacing:.3px}
 .wc-prem-btn:active{transform:scale(.97)}
 .wc-prem-cancel{width:100%;padding:10px;border-radius:10px;border:none;background:none;color:var(--text2);font-family:inherit;font-size:12px;cursor:pointer}
 /* User avatar in header */
@@ -2367,27 +2382,56 @@ button:active{transform:scale(.96)!important}
 <!-- Premium Modal -->
 <div id="wc-premium-modal" class="wc-premium-modal" style="display:none" onclick="if(event.target===this)wcClosePremium()">
   <div class="wc-premium-sheet">
+    <!-- Hero -->
     <div class="wc-premium-hero">
-      <button style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px" onclick="wcClosePremium()">✕</button>
-      <div style="font-size:36px;margin-bottom:6px">👑</div>
-      <span class="wc-prem-badge">PREMIUM</span>
-      <div style="font-size:20px;font-weight:900;margin-top:6px;color:#fff">Desbloquea todo</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px">Un Mundial. Sin límites.</div>
+      <button style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1" onclick="wcClosePremium()">✕</button>
+      <div style="font-size:10px;font-weight:900;letter-spacing:3px;color:#445;text-transform:uppercase;margin-bottom:10px">Elige tu nivel</div>
+      <div style="font-size:26px;font-weight:900;color:#fff;margin-bottom:4px">Un Mundial.<br>Tu experiencia.</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.35);margin-top:4px">Compara los planes y elige el tuyo</div>
     </div>
-    <div class="wc-premium-features">
-      <div class="wc-prem-feat"><span class="wc-prem-feat-icon">🤖</span><div><div style="font-weight:800">Apuestas IA ilimitadas</div><div style="color:var(--text2);font-size:11px">Picks diarios con análisis de Claude</div></div></div>
-      <div class="wc-prem-feat"><span class="wc-prem-feat-icon">📊</span><div><div style="font-weight:800">Perfil táctico completo</div><div style="color:var(--text2);font-size:11px">Formación, coach, stats y SofaScore</div></div></div>
-      <div class="wc-prem-feat"><span class="wc-prem-feat-icon">📦</span><div><div style="font-weight:800">Álbum ilimitado</div><div style="color:var(--text2);font-size:11px">Sobres diarios y cromos legendarios</div></div></div>
-      <div class="wc-prem-feat"><span class="wc-prem-feat-icon">🧠</span><div><div style="font-weight:800">Quiz Leyenda desbloqueado</div><div style="color:var(--text2);font-size:11px">Las 60 preguntas + dificultad leyenda</div></div></div>
-      <div class="wc-prem-feat"><span class="wc-prem-feat-icon">💾</span><div><div style="font-weight:800">Sincronización en la nube</div><div style="color:var(--text2);font-size:11px">Tu progreso en todos tus dispositivos</div></div></div>
+    <!-- Tier comparison -->
+    <div class="wc-tier-grid">
+      <!-- HINCHA -->
+      <div class="wc-tier-col hincha">
+        <div class="wc-tier-label hincha">Plan</div>
+        <div class="wc-tier-name hincha">Hincha</div>
+        <div class="wc-tier-price">Siempre gratis</div>
+        <div class="wc-tier-row"><span class="ck yes">✓</span>Simulador de grupos</div>
+        <div class="wc-tier-row"><span class="ck yes">✓</span>Bracket completo</div>
+        <div class="wc-tier-row"><span class="ck yes">✓</span>Quiz básico (20 preg.)</div>
+        <div class="wc-tier-row"><span class="ck yes">✓</span>1 sobre de álbum/día</div>
+        <div class="wc-tier-row"><span class="ck yes">✓</span>Chat en vivo</div>
+        <div class="wc-tier-row"><span class="ck no">—</span>IA de apuestas</div>
+        <div class="wc-tier-row"><span class="ck no">—</span>Stats tácticos</div>
+        <div class="wc-tier-row"><span class="ck no">—</span>Quiz Leyenda</div>
+        <div class="wc-tier-row"><span class="ck no">—</span>Álbum ilimitado</div>
+        <div class="wc-tier-row"><span class="ck no">—</span>Sincronización nube</div>
+      </div>
+      <!-- ÉLITE -->
+      <div class="wc-tier-col elite">
+        <div class="wc-tier-label elite">✦ Premium</div>
+        <div class="wc-tier-name elite">Élite</div>
+        <div class="wc-tier-price elite">$4.99/mes · o $39/año</div>
+        <div class="wc-tier-row elite-row"><span class="ck yes">✓</span>Simulador de grupos</div>
+        <div class="wc-tier-row elite-row"><span class="ck yes">✓</span>Bracket completo</div>
+        <div class="wc-tier-row elite-row"><span class="ck yes">✓</span>Quiz básico (20 preg.)</div>
+        <div class="wc-tier-row elite-row"><span class="ck yes">✓</span>1 sobre de álbum/día</div>
+        <div class="wc-tier-row elite-row"><span class="ck yes">✓</span>Chat en vivo</div>
+        <div class="wc-tier-row elite-row"><span class="ck" style="color:#f5d062">★</span>IA de apuestas ∞</div>
+        <div class="wc-tier-row elite-row"><span class="ck" style="color:#f5d062">★</span>Stats tácticos completos</div>
+        <div class="wc-tier-row elite-row"><span class="ck" style="color:#f5d062">★</span>Quiz Leyenda (60 preg.)</div>
+        <div class="wc-tier-row elite-row"><span class="ck" style="color:#f5d062">★</span>Sobres ilimitados</div>
+        <div class="wc-tier-row elite-row"><span class="ck" style="color:#f5d062">★</span>Sincronización nube</div>
+      </div>
     </div>
+    <!-- Footer CTA -->
     <div class="wc-premium-footer">
       <div class="wc-prem-price">
         <div class="wc-prem-price-main">$4.99<span style="font-size:16px;font-weight:600;color:var(--text2)">/mes</span></div>
-        <div class="wc-prem-price-sub">o $39/año · Cancela cuando quieras</div>
+        <div class="wc-prem-price-sub">o $39/año — ahorrás 35% · Cancelá cuando quieras</div>
       </div>
-      <button class="wc-prem-btn" onclick="wcStartCheckout()">👑 Obtener Premium</button>
-      <button class="wc-prem-cancel" onclick="wcClosePremium()">Quizás más tarde</button>
+      <button class="wc-prem-btn" onclick="wcStartCheckout()">✦ Convertirme en Élite</button>
+      <button class="wc-prem-cancel" onclick="wcClosePremium()">Continuar como Hincha</button>
     </div>
   </div>
 </div>
@@ -12521,7 +12565,7 @@ function wcUpdateUserUI(){
   if(!pill) return;
   if(wcAuth.user){
     var initials = (wcAuth.user.name||'U').charAt(0).toUpperCase();
-    pill.innerHTML = '<div class="wc-user-avatar">'+initials+'</div><span>'+( wcAuth.user.name||wcAuth.user.email.split('@')[0] )+'</span>'+(wcAuth.isPremium?'<span class="wc-premium-crown">👑</span>':'');
+    pill.innerHTML = '<div class="wc-user-avatar">'+initials+'</div><span>'+( wcAuth.user.name||wcAuth.user.email.split('@')[0] )+'</span>'+(wcAuth.isPremium?'<span class="wc-premium-crown" style="font-size:9px;background:linear-gradient(135deg,#c9a227,#f5d062);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;letter-spacing:.5px"> ✦ ÉLITE</span>':'');
     pill.onclick = wcShowUserMenu;
   } else {
     pill.innerHTML = '👤 Entrar';

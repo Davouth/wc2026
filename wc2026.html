@@ -1964,6 +1964,43 @@ input.wc-chaos-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;he
   #go-char{width:88px}
   .go-bubble{max-width:168px;font-size:10.5px}
 }
+
+/* ══ RESPONSIVE MÓVIL ══════════════════════════════════════════════════════ */
+@media(max-width:700px){
+  /* Header — ocultar elementos no esenciales */
+  .wc-chaos-wrap,
+  .wc-load-video-btn,
+  #wc-status,
+  #wc-sim-counter,
+  #wc-xp-widget,
+  #wc-lang-btn,
+  #wc-vbg-load-btn { display:none !important; }
+
+  /* Header — reducir padding y altura */
+  .app-header { padding:0 12px !important; height:auto !important; min-height:48px; flex-wrap:wrap; gap:6px; padding-top:6px !important; padding-bottom:6px !important; }
+
+  /* Botones del header más compactos */
+  #wc-sim-btn, .app-header button[onclick*="wcOpenSimModal"],
+  .app-header button[onclick*="resetTodo"] {
+    font-size:10px !important;
+    padding:5px 10px !important;
+  }
+
+  /* Título más pequeño */
+  .app-title { font-size:14px !important; }
+
+  /* Grupos — 1 columna en móvil */
+  .wc-groups-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Tab indicator — ocultar en móvil (usa nav inferior) */
+  .app-tabs { display:none !important; }
+
+  /* Chat bubble — subir para no tapar nav */
+  #wc-chat-bubble { bottom: 70px !important; }
+  #wc-chat-panel  { bottom: 118px !important; width: calc(100vw - 28px) !important; right: 14px !important; }
+}
 /* ═══════════════════════════════════════════
    QUIZ / ADIVINANZA — Premium Tab
 ═══════════════════════════════════════════ */
@@ -11586,17 +11623,17 @@ function wcMcGol(p){
   var IDLE_MSGS = [
     'WC2026 se acerca ⚽🌎',
     '¿Ya revisaste el álbum hoy? 📦',
-    '¡GCR tiene 1,055 trades! 🤖',
-    '¡Actualiza tu pronóstico! 🎯',
-    'Tip: filtra por grupo 📊',
+    '¡Actualizá tu pronóstico! 🎯',
+    'Tip: filtrá por grupo 📊',
     '3 países, 1 copa 🏆',
     '¿Quién ganará el WC2026? 🌟',
+    '51 días para el Mundial ⏳',
+    '¿Ya completaste el quiz? 🧠',
   ];
   var CLICK_MSGS = [
     '¡Vamos campeones! 🏆',
-    '¿Quieres ver estadísticas? 📊',
-    '¡GCR está en racha hoy! 🔥',
-    '¡Abre tu sobre del álbum! 📦',
+    '¿Querés ver estadísticas? 📊',
+    '¡Abrí tu sobre del álbum! 📦',
     'WC2026 es el más grande 🌎⚽',
     '¡México 🇲🇽 USA 🇺🇸 Canadá 🇨🇦!',
   ];

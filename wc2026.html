@@ -1635,14 +1635,127 @@ body{display:flex;flex-direction:column}
 }
 
 
-/* ── Dashboard entrance — elements animate in after splash leaves */
-body.app-ready .app-header{animation:app-el-in .5s .05s both}
-body.app-ready .app-tabs  {animation:app-el-in .5s .12s both}
-body.app-ready .app-content{animation:app-el-in .6s .2s both}
+/* ── Dashboard entrance — staggered, refined */
+body.app-ready .app-header  {animation:app-el-in .45s cubic-bezier(.22,1,.36,1) .04s both}
+body.app-ready .app-tabs    {animation:app-el-in .45s cubic-bezier(.22,1,.36,1) .10s both}
+body.app-ready .wc-mobile-nav{animation:app-el-in .45s cubic-bezier(.22,1,.36,1) .14s both}
+body.app-ready .app-content {animation:app-el-in .55s cubic-bezier(.22,1,.36,1) .18s both}
+body.app-ready .wc-dash     {animation:app-el-in .55s cubic-bezier(.22,1,.36,1) .22s both}
 @keyframes app-el-in{
-  from{opacity:0;transform:translateY(16px)}
+  from{opacity:0;transform:translateY(18px)}
   to{opacity:1;transform:translateY(0)}
 }
+
+/* ══════════════════════════════════════════
+   PREMIUM MOTION SYSTEM
+══════════════════════════════════════════ */
+
+/* ── Splash: light sweep across logo ── */
+@keyframes logo-sweep{
+  0%{background-position:-200% center}
+  100%{background-position:300% center}
+}
+.splash-logo-svg{
+  animation:splash-float 3s ease-in-out 1s infinite alternate,
+            logo-sweep 2.8s 0.8s ease-in-out infinite!important;
+}
+/* Sweep overlay on logo */
+.splash-logo-wrap::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.18) 50%,transparent 65%);
+  background-size:200% 100%;
+  animation:logo-sweep 2.4s 1.2s ease-in-out infinite;
+  pointer-events:none;border-radius:12px;
+}
+
+/* ── Global button microinteractions ── */
+button:not(.wc-prem-cancel):not(.splash-skip):active,
+.btn:active,.wc-sim-btn:active,.wc-tab-btn:active,
+.app-tab-btn:active,.wc-mobile-nav-btn:active,
+.wc-round-pill:active,.wc-et-btn:active{
+  transform:scale(.95)!important;
+  transition:transform .1s ease!important;
+}
+button{transition:transform .18s ease,box-shadow .18s ease,background .18s ease,opacity .18s ease}
+
+/* ── Card press elevation ── */
+.wc-group-card:active,.match-card:active,.wc-value-card:active,
+.wc-bk-card:active,.wc-dash-champ:active,.wc-dash-final-row:active{
+  transform:scale(.98)!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.4)!important;
+  transition:transform .1s ease,box-shadow .1s ease!important;
+}
+.wc-group-card:hover,.wc-value-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(55,77,245,.15);
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+
+/* ── Tab pane transitions: fade + directional slide ── */
+.app-tab-pane{
+  opacity:0;
+  transform:translateY(10px);
+  transition:opacity .32s cubic-bezier(.4,0,.2,1),transform .32s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+}
+.app-tab-pane.active{
+  opacity:1;transform:translateY(0);pointer-events:auto;
+  display:block!important;
+}
+@keyframes tab-in-r{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes tab-in-l{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+@keyframes tab-in-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.tab-anim-r{animation:tab-in-r .34s cubic-bezier(.4,0,.2,1) both!important;pointer-events:auto!important}
+.tab-anim-l{animation:tab-in-l .34s cubic-bezier(.4,0,.2,1) both!important;pointer-events:auto!important}
+.tab-anim-up{animation:tab-in-up .30s ease both!important;pointer-events:auto!important}
+
+/* ── Mobile nav: ripple glow on active ── */
+.wc-mobile-nav-btn{transition:color .2s ease,background .2s ease;position:relative}
+.wc-mobile-nav-btn .mnav-icon{transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.wc-mobile-nav-btn.active .mnav-icon{transform:scale(1.18) translateY(-2px)}
+.wc-mobile-nav-btn:active .mnav-icon{transform:scale(.88)}
+
+/* ── Modal: scale-up entrance ── */
+@keyframes modal-in{
+  from{opacity:0;transform:scale(.94) translateY(12px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+@keyframes modal-out{
+  from{opacity:1;transform:scale(1)}
+  to{opacity:0;transform:scale(.96)}
+}
+.wc-auth-modal > *,.wc-premium-modal > *{
+  animation:modal-in .28s cubic-bezier(.22,1,.36,1) both;
+}
+.wc-premium-sheet,.wc-auth-sheet,.wc-prof-sheet{
+  animation:modal-in .28s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* ── Staggered card reveal when tab loads ── */
+@keyframes card-stagger{
+  from{opacity:0;transform:translateY(14px) scale(.99)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.wc-tab-pane.active > *,.app-tab-pane.active > *{
+  animation:card-stagger .35s cubic-bezier(.22,1,.36,1) both;
+}
+.app-tab-pane.active > *:nth-child(1){animation-delay:.04s}
+.app-tab-pane.active > *:nth-child(2){animation-delay:.08s}
+.app-tab-pane.active > *:nth-child(3){animation-delay:.12s}
+.app-tab-pane.active > *:nth-child(4){animation-delay:.16s}
+.app-tab-pane.active > *:nth-child(n+5){animation-delay:.20s}
+
+/* ── Smooth scroll behavior ── */
+html{scroll-behavior:smooth}
+
+/* ── Invest / overlay modals ── */
+#wc-invest-modal > *,#wc-paywall-wrap > *,.pw-sheet{
+  animation:modal-in .26s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* ── Header on scroll: subtle shadow ── */
+header{transition:box-shadow .3s ease,background .3s ease}
+header.scrolled{box-shadow:0 4px 24px rgba(0,0,0,.35)}
 
 
 
@@ -2105,7 +2218,7 @@ input.wc-chaos-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;he
 .wq-cat-estadios{background:rgba(139,92,246,.2);color:#c4b5fd}
 /* ── Screen transition ── */
 .wq-screen{animation:wqFadeIn .28s ease both}
-@keyframes wqFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes wqFadeIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 
 /* ══════════════════════════════════════════
    GLOBAL TRANSITIONS & ANIMATIONS
@@ -10648,6 +10761,16 @@ function _splashExit() {
   splash.addEventListener('animationend', removeSplash, { once: true });
   setTimeout(removeSplash, 1400); // fallback if animationend doesn't fire
 }
+
+// ─── PREMIUM MOTION: header scroll shadow ────────────────────────────────────
+(function(){
+  const hdr = document.querySelector('header');
+  if (!hdr) return;
+  const mainEl = document.querySelector('main') || document.documentElement;
+  const onScroll = () => hdr.classList.toggle('scrolled', (mainEl.scrollTop || window.scrollY) > 8);
+  window.addEventListener('scroll', onScroll, {passive:true});
+  mainEl.addEventListener && mainEl.addEventListener('scroll', onScroll, {passive:true});
+})();
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded',function(){

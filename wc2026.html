@@ -12069,6 +12069,7 @@ function wcMcGol(p){
   var _goAudioCtx = null;
   function _goGetCtx() {
     if (!_goAudioCtx) { try { _goAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+    if (_goAudioCtx && _goAudioCtx.state === 'suspended') { try { _goAudioCtx.resume(); } catch(e){} }
     return _goAudioCtx;
   }
   function _goPlayTone(freq, type, dur, vol) {
@@ -12090,6 +12091,7 @@ function wcMcGol(p){
   function _goSoundAlert()   { _goPlayTone(220,'sawtooth',0.18,0.08); }
   function _goPlayFlintstones() {
     var ctx = _goGetCtx(); if (!ctx) return;
+    function _play() {
     // "Meet the Flintstones" + "Yabba Dabba Doo!" melody (F major)
     var notes = [
       // Meet the Flin-stones
@@ -12121,6 +12123,12 @@ function wcMcGol(p){
         osc.stop(ctx.currentTime + n[2] + n[3] + 0.02);
       } catch(e){}
     });
+    }
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(_play).catch(function(){_play();});
+    } else {
+      _play();
+    }
   }
   function _goVibrate(pattern){ try { if(navigator.vibrate) navigator.vibrate(pattern); } catch(e){} }
 

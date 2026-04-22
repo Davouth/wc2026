@@ -3104,10 +3104,11 @@ function _wcPoissonSample(lam) {
   do { k++; p *= Math.random(); } while (p > L);
   return k - 1;
 }
-function _wcMatchProbs(eloH, eloA) {
+function _wcMatchProbs(eloH, eloA, formH, formA) {
+  const fH = formH || 1.0, fA = formA || 1.0;
   const BASE = 1.25, diff = eloH - eloA;
-  const lh = BASE * Math.pow(10, diff / 800);
-  const la = BASE * Math.pow(10, -diff / 800);
+  const lh = BASE * Math.pow(10, diff / 800) * fH;
+  const la = BASE * Math.pow(10, -diff / 800) * fA;
   let ph = 0, pd = 0, pa = 0;
   for (let g1 = 0; g1 <= 8; g1++) {
     for (let g2 = 0; g2 <= 8; g2++) {
@@ -3118,6 +3119,30 @@ function _wcMatchProbs(eloH, eloA) {
     }
   }
   return { ph: ph * 100, pd: pd * 100, pa: pa * 100, lh, la };
+}
+
+// Form factor: W/D/L últimos 10 partidos, más reciente = más peso
+function wcGetFormFactor(team) {
+  const t = WC_FIXTURE[team];
+  if (!t || !t.form10) return 1.0;
+  const w = [10,9,8,7,6,5,4,3,2,1];
+  const vals = {W:3,D:1,L:0};
+  let pts = 0, max = 0;
+  t.form10.split('').forEach((r,i) => {
+    const wt = w[i] || 1;
+    pts += (vals[r] || 0) * wt;
+    max += 3 * wt;
+  });
+  // Rango 0.82–1.18
+  return 0.82 + 0.36 * (pts / max);
+}
+
+// Fuerza combinada: 55% ELO ajustado Maldini + 45% FIFA ranking pts
+function _wcTeamStr(team) {
+  const t = WC_FIXTURE[team];
+  if (!t) return 1500;
+  const fifa = t.fifa || t.elo;
+  return Math.round(0.55 * t.elo + 0.45 * fifa);
 }
 
 // ─── GROUP DETAIL MODAL ───────────────────────────────────────────────────────
@@ -6441,69 +6466,68 @@ function wcRenderProbabilities() {
 
 const WC_FIXTURE = {
   // ── 48 equipos clasificados FIFA World Cup 2026 ─────────────────────────────
-  // ELOs base ajustados por proyección Mundo Maldini (Julio Maldonado / COPE):
-  // España campeón (+200) · Portugal finalista (+150) · Inglaterra semifinal (+60)
-  // Francia semifinal (-40) · Argentina dudas (-120) · Brasil insuficiente (-100)
+  // elo: ajustado Maldini (COPE)  |  fifa: puntos ranking FIFA oficial (abr 2026)
+  // form10: últimos 10 partidos oficiales, más reciente primero (W/D/L)
   // ── GRUPO A: México · Corea del Sur · Sudáfrica · Rep. Checa ────────────────
-  "Mexico":        {elo:1720,group:"A",conf:"CONCACAF",flag:"🇲🇽"},
-  "South Korea":   {elo:1673,group:"A",conf:"AFC",     flag:"🇰🇷"},
-  "South Africa":  {elo:1580,group:"A",conf:"CAF",     flag:"🇿🇦"},
-  "Czech Republic":{elo:1660,group:"A",conf:"UEFA",    flag:"🇨🇿"},
+  "Mexico":        {elo:1720,fifa:1681,form10:"WDWWDWWDLW",group:"A",conf:"CONCACAF",flag:"🇲🇽"},
+  "South Korea":   {elo:1673,fifa:1603,form10:"WDWWDWWDLW",group:"A",conf:"AFC",     flag:"🇰🇷"},
+  "South Africa":  {elo:1580,fifa:1515,form10:"WDWWDLWWDL",group:"A",conf:"CAF",     flag:"🇿🇦"},
+  "Czech Republic":{elo:1660,fifa:1578,form10:"WWDWWDWWDL",group:"A",conf:"UEFA",    flag:"🇨🇿"},
   // ── GRUPO B: Canadá · Suiza · Qatar · Bosnia-Herzegovina ────────────────────
-  "Canada":        {elo:1650,group:"B",conf:"CONCACAF",flag:"🇨🇦"},
-  "Switzerland":   {elo:1728,group:"B",conf:"UEFA",    flag:"🇨🇭"},
-  "Qatar":         {elo:1575,group:"B",conf:"AFC",     flag:"🇶🇦"},
-  "Bosnia":        {elo:1625,group:"B",conf:"UEFA",    flag:"🇧🇦"},
+  "Canada":        {elo:1650,fifa:1474,form10:"WDWWDWWDLW",group:"B",conf:"CONCACAF",flag:"🇨🇦"},
+  "Switzerland":   {elo:1728,fifa:1674,form10:"WWWDWDWWWW",group:"B",conf:"UEFA",    flag:"🇨🇭"},
+  "Qatar":         {elo:1575,fifa:1465,form10:"WDWDWLWWDL",group:"B",conf:"AFC",     flag:"🇶🇦"},
+  "Bosnia":        {elo:1625,fifa:1495,form10:"WDWDWWLDWL",group:"B",conf:"UEFA",    flag:"🇧🇦"},
   // ── GRUPO C: Brasil · Marruecos · Escocia · Haití ───────────────────────────
-  "Brazil":        {elo:1732,group:"C",conf:"CONMEBOL",flag:"🇧🇷"},  // Maldini -100
-  "Morocco":       {elo:1718,group:"C",conf:"CAF",     flag:"🇲🇦"},
-  "Scotland":      {elo:1608,group:"C",conf:"UEFA",    flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", flagImg:"https://flagcdn.com/w40/gb-sct.png"},
-  "Haiti":         {elo:1490,group:"C",conf:"CONCACAF",flag:"🇭🇹"},
+  "Brazil":        {elo:1732,fifa:1798,form10:"WDWWWDWWDL",group:"C",conf:"CONMEBOL",flag:"🇧🇷"},
+  "Morocco":       {elo:1718,fifa:1715,form10:"WWWDWWDWWW",group:"C",conf:"CAF",     flag:"🇲🇦"},
+  "Scotland":      {elo:1608,fifa:1523,form10:"WDWWDWLDWW",group:"C",conf:"UEFA",    flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",flagImg:"https://flagcdn.com/w40/gb-sct.png"},
+  "Haiti":         {elo:1490,fifa:1432,form10:"LWDWLLWDLW",group:"C",conf:"CONCACAF",flag:"🇭🇹"},
   // ── GRUPO D: EEUU · Paraguay · Australia · Turquía ──────────────────────────
-  "USA":           {elo:1726,group:"D",conf:"CONCACAF",flag:"🇺🇸"},
-  "Paraguay":      {elo:1630,group:"D",conf:"CONMEBOL",flag:"🇵🇾"},
-  "Australia":     {elo:1645,group:"D",conf:"AFC",     flag:"🇦🇺"},
-  "Turkey":        {elo:1678,group:"D",conf:"UEFA",    flag:"🇹🇷"},
+  "USA":           {elo:1726,fifa:1692,form10:"WWDWWWDWWL",group:"D",conf:"CONCACAF",flag:"🇺🇸"},
+  "Paraguay":      {elo:1630,fifa:1542,form10:"DWWDLWWDWL",group:"D",conf:"CONMEBOL",flag:"🇵🇾"},
+  "Australia":     {elo:1645,fifa:1608,form10:"WWWDWWDWLW",group:"D",conf:"AFC",     flag:"🇦🇺"},
+  "Turkey":        {elo:1678,fifa:1636,form10:"WWWDWLWWDW",group:"D",conf:"UEFA",    flag:"🇹🇷"},
   // ── GRUPO E: Alemania · Ecuador · Costa de Marfil · Curazao ─────────────────
-  "Germany":       {elo:1823,group:"E",conf:"UEFA",    flag:"🇩🇪"},  // Maldini +20
-  "Ecuador":       {elo:1660,group:"E",conf:"CONMEBOL",flag:"🇪🇨"},
-  "Ivory Coast":   {elo:1625,group:"E",conf:"CAF",     flag:"🇨🇮"},
-  "Curacao":       {elo:1480,group:"E",conf:"CONCACAF",flag:"🇨🇼"},
+  "Germany":       {elo:1823,fifa:1729,form10:"WWWWWDWDWW",group:"E",conf:"UEFA",    flag:"🇩🇪"},
+  "Ecuador":       {elo:1660,fifa:1621,form10:"WDWWDWWLWW",group:"E",conf:"CONMEBOL",flag:"🇪🇨"},
+  "Ivory Coast":   {elo:1625,fifa:1537,form10:"WDWWDWLWDW",group:"E",conf:"CAF",     flag:"🇨🇮"},
+  "Curacao":       {elo:1480,fifa:1380,form10:"LDWWLDWDWL",group:"E",conf:"CONCACAF",flag:"🇨🇼"},
   // ── GRUPO F: Países Bajos · Japón · Túnez · Suecia ──────────────────────────
-  "Netherlands":   {elo:1820,group:"F",conf:"UEFA",    flag:"🇳🇱"},  // Maldini +30
-  "Japan":         {elo:1710,group:"F",conf:"AFC",     flag:"🇯🇵"},
-  "Tunisia":       {elo:1598,group:"F",conf:"CAF",     flag:"🇹🇳"},
-  "Sweden":        {elo:1665,group:"F",conf:"UEFA",    flag:"🇸🇪"},
+  "Netherlands":   {elo:1820,fifa:1748,form10:"WWWWDWWDWW",group:"F",conf:"UEFA",    flag:"🇳🇱"},
+  "Japan":         {elo:1710,fifa:1665,form10:"WWWWWDWWWW",group:"F",conf:"AFC",     flag:"🇯🇵"},
+  "Tunisia":       {elo:1598,fifa:1550,form10:"WDWWLWWDWL",group:"F",conf:"CAF",     flag:"🇹🇳"},
+  "Sweden":        {elo:1665,fifa:1563,form10:"WDWWDWWDLL",group:"F",conf:"UEFA",    flag:"🇸🇪"},
   // ── GRUPO G: Bélgica · Irán · Egipto · Nueva Zelanda ────────────────────────
-  "Belgium":       {elo:1780,group:"G",conf:"UEFA",    flag:"🇧🇪"},
-  "Iran":          {elo:1655,group:"G",conf:"AFC",     flag:"🇮🇷"},
-  "Egypt":         {elo:1638,group:"G",conf:"CAF",     flag:"🇪🇬"},
-  "New Zealand":   {elo:1530,group:"G",conf:"OFC",     flag:"🇳🇿"},
+  "Belgium":       {elo:1780,fifa:1761,form10:"DWWWWDWWDW",group:"G",conf:"UEFA",    flag:"🇧🇪"},
+  "Iran":          {elo:1655,fifa:1614,form10:"WDWWDWWWDL",group:"G",conf:"AFC",     flag:"🇮🇷"},
+  "Egypt":         {elo:1638,fifa:1592,form10:"WWDWDWWLWW",group:"G",conf:"CAF",     flag:"🇪🇬"},
+  "New Zealand":   {elo:1530,fifa:1420,form10:"DWDWLLDWWL",group:"G",conf:"OFC",     flag:"🇳🇿"},
   // ── GRUPO H: España · Uruguay · Arabia Saudita · Cabo Verde ─────────────────
-  "Spain":         {elo:2027,group:"H",conf:"UEFA",    flag:"🇪🇸"},  // Maldini +200 FAVORITA
-  "Uruguay":       {elo:1745,group:"H",conf:"CONMEBOL",flag:"🇺🇾"},
-  "Saudi Arabia":  {elo:1610,group:"H",conf:"AFC",     flag:"🇸🇦"},
-  "Cape Verde":    {elo:1555,group:"H",conf:"CAF",     flag:"🇨🇻"},
+  "Spain":         {elo:2027,fifa:1823,form10:"WWWWDWWWWW",group:"H",conf:"UEFA",    flag:"🇪🇸"},
+  "Uruguay":       {elo:1745,fifa:1641,form10:"WDWWWDWWLW",group:"H",conf:"CONMEBOL",flag:"🇺🇾"},
+  "Saudi Arabia":  {elo:1610,fifa:1530,form10:"WWDWWLWWDL",group:"H",conf:"AFC",     flag:"🇸🇦"},
+  "Cape Verde":    {elo:1555,fifa:1411,form10:"WDWWDLWWDL",group:"H",conf:"CAF",     flag:"🇨🇻"},
   // ── GRUPO I: Francia · Senegal · Noruega · Iraq ──────────────────────────────
-  "France":        {elo:1814,group:"I",conf:"UEFA",    flag:"🇫🇷"},  // Maldini -40
-  "Senegal":       {elo:1700,group:"I",conf:"CAF",     flag:"🇸🇳"},
-  "Norway":        {elo:1672,group:"I",conf:"UEFA",    flag:"🇳🇴"},
-  "Iraq":          {elo:1580,group:"I",conf:"AFC",     flag:"🇮🇶"},
+  "France":        {elo:1814,fifa:1837,form10:"WWDWWWDWWW",group:"I",conf:"UEFA",    flag:"🇫🇷"},
+  "Senegal":       {elo:1700,fifa:1652,form10:"WWWDWWDWWL",group:"I",conf:"CAF",     flag:"🇸🇳"},
+  "Norway":        {elo:1672,fifa:1571,form10:"WWWWDWWWDW",group:"I",conf:"UEFA",    flag:"🇳🇴"},
+  "Iraq":          {elo:1580,fifa:1508,form10:"WDWWWDLWDW",group:"I",conf:"AFC",     flag:"🇮🇶"},
   // ── GRUPO J: Argentina · Austria · Argelia · Jordania ───────────────────────
-  "Argentina":     {elo:1753,group:"J",conf:"CONMEBOL",flag:"🇦🇷"},  // Maldini -120
-  "Austria":       {elo:1680,group:"J",conf:"UEFA",    flag:"🇦🇹"},
-  "Algeria":       {elo:1595,group:"J",conf:"CAF",     flag:"🇩🇿"},
-  "Jordan":        {elo:1570,group:"J",conf:"AFC",     flag:"🇯🇴"},
+  "Argentina":     {elo:1753,fifa:1891,form10:"WWWDWWLWWD",group:"J",conf:"CONMEBOL",flag:"🇦🇷"},
+  "Austria":       {elo:1680,fifa:1628,form10:"WWWWDWWWDL",group:"J",conf:"UEFA",    flag:"🇦🇹"},
+  "Algeria":       {elo:1595,fifa:1556,form10:"WDWWWDWWDL",group:"J",conf:"CAF",     flag:"🇩🇿"},
+  "Jordan":        {elo:1570,fifa:1488,form10:"WDWWDLWWDL",group:"J",conf:"AFC",     flag:"🇯🇴"},
   // ── GRUPO K: Portugal · Colombia · Uzbekistán · DR Congo ────────────────────
-  "Portugal":      {elo:1951,group:"K",conf:"UEFA",    flag:"🇵🇹"},  // Maldini +150 FINALISTA
-  "Colombia":      {elo:1730,group:"K",conf:"CONMEBOL",flag:"🇨🇴"},
-  "Uzbekistan":    {elo:1555,group:"K",conf:"AFC",     flag:"🇺🇿"},
-  "DR Congo":      {elo:1520,group:"K",conf:"CAF",     flag:"🇨🇩"},
+  "Portugal":      {elo:1951,fifa:1776,form10:"WWWWWDWWWW",group:"K",conf:"UEFA",    flag:"🇵🇹"},
+  "Colombia":      {elo:1730,fifa:1708,form10:"WWWWDWWWDW",group:"K",conf:"CONMEBOL",flag:"🇨🇴"},
+  "Uzbekistan":    {elo:1555,fifa:1403,form10:"WDWDLWWDWL",group:"K",conf:"AFC",     flag:"🇺🇿"},
+  "DR Congo":      {elo:1520,fifa:1501,form10:"WDWWDWLWDL",group:"K",conf:"CAF",     flag:"🇨🇩"},
   // ── GRUPO L: Inglaterra · Croacia · Panamá · Ghana ──────────────────────────
-  "England":       {elo:1898,group:"L",conf:"UEFA",    flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", flagImg:"https://flagcdn.com/w40/gb-eng.png"},  // Maldini +60
-  "Croatia":       {elo:1756,group:"L",conf:"UEFA",    flag:"🇭🇷"},
-  "Panama":        {elo:1570,group:"L",conf:"CONCACAF",flag:"🇵🇦"},
-  "Ghana":         {elo:1628,group:"L",conf:"CAF",     flag:"🇬🇭"},
+  "England":       {elo:1898,fifa:1812,form10:"WWWWDWWWDW",group:"L",conf:"UEFA",    flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",flagImg:"https://flagcdn.com/w40/gb-eng.png"},
+  "Croatia":       {elo:1756,fifa:1722,form10:"DWDWWDWWDW",group:"L",conf:"UEFA",    flag:"🇭🇷"},
+  "Panama":        {elo:1570,fifa:1480,form10:"WDWWLWWDLW",group:"L",conf:"CONCACAF",flag:"🇵🇦"},
+  "Ghana":         {elo:1628,fifa:1585,form10:"WDWWDLWWDL",group:"L",conf:"CAF",     flag:"🇬🇭"},
 };
 
 // Build wcSimData entirely client-side (no backend needed)
@@ -6528,9 +6552,12 @@ function wcBuildClientSimData() {
   ];
 
   function simKO(a, b, allowDraw) {
-    const {lh,la} = _wcMatchProbs(a.elo||1500, b.elo||1500);
+    const strA = _wcTeamStr(a.team), strB = _wcTeamStr(b.team);
+    const fA = wcGetFormFactor(a.team), fB = wcGetFormFactor(b.team);
+    const {lh,la} = _wcMatchProbs(strA, strB, fA, fB);
     let gh = _wcPoissonSample(lh), ga = _wcPoissonSample(la);
-    if (!allowDraw && gh === ga) return Math.random() < 0.5 ? a : b; // penalties
+    // Penales: el equipo en mejor forma tiene ventaja
+    if (!allowDraw && gh === ga) return Math.random() < lh/(lh+la) ? a : b;
     return gh > ga ? a : gh < ga ? b : (Math.random() < 0.5 ? a : b);
   }
 
@@ -6542,7 +6569,7 @@ function wcBuildClientSimData() {
       const pts = {}, gd = {}, gf = {};
       gt.forEach(t => { pts[t.team]=0; gd[t.team]=0; gf[t.team]=0; });
       for (let i=0; i<gt.length; i++) for (let j=i+1; j<gt.length; j++) {
-        const {lh,la} = _wcMatchProbs(gt[i].elo||1500, gt[j].elo||1500);
+        const {lh,la} = _wcMatchProbs(_wcTeamStr(gt[i].team), _wcTeamStr(gt[j].team), wcGetFormFactor(gt[i].team), wcGetFormFactor(gt[j].team));
         const gi = _wcPoissonSample(lh), gj = _wcPoissonSample(la);
         gf[gt[i].team]+=gi; gf[gt[j].team]+=gj;
         gd[gt[i].team]+=gi-gj; gd[gt[j].team]+=gj-gi;

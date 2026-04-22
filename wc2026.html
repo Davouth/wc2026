@@ -567,6 +567,104 @@ body.light-mode .wc-bk-conn-seg::after,body.light-mode .wc-bk-conn-seg.mir::afte
 /* ── AMBIENT BACKGROUND PARTICLES ── */
 #wc-ambient{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45}
 
+/* ══════════════════════════════════════════════════════════════════
+   HOME PREMIUM — Fase A Redesign
+══════════════════════════════════════════════════════════════════ */
+.wc-home{position:relative;overflow:hidden;margin-bottom:24px}
+
+/* Background atmosphere — stadium glow orbs */
+.wc-home-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.wc-home-orb{position:absolute;border-radius:50%;filter:blur(72px);will-change:transform}
+.wc-home-orb-1{width:380px;height:380px;background:rgba(55,77,245,.28);top:-120px;left:-100px;animation:orb-drift1 9s ease-in-out infinite}
+.wc-home-orb-2{width:280px;height:280px;background:rgba(245,197,24,.18);bottom:-60px;right:-80px;animation:orb-drift2 11s ease-in-out infinite}
+.wc-home-orb-3{width:200px;height:200px;background:rgba(6,182,212,.15);top:40%;left:55%;animation:orb-drift1 7s ease-in-out 1.5s infinite reverse}
+@keyframes orb-drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(24px,-18px) scale(1.08)}}
+@keyframes orb-drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-20px,16px) scale(1.12)}}
+
+/* XP bar */
+.wc-home-xp{position:relative;z-index:1;display:flex;align-items:center;gap:8px;margin-bottom:22px;opacity:0;animation:hfu .5s .15s ease both}
+.wc-home-xp-lv{font-size:10px;font-weight:800;background:linear-gradient(135deg,#f5c518,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;flex-shrink:0}
+.wc-home-xp-track{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.wc-home-xp-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#374df5,#f5c518);transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+.wc-home-xp-pts{font-size:8px;font-weight:700;color:var(--text3);white-space:nowrap;flex-shrink:0}
+
+/* Hero text */
+.wc-home-hero{position:relative;z-index:1;padding:10px 0 0}
+.wc-home-eyebrow{font-size:8px;font-weight:800;letter-spacing:3px;color:#f5c518;text-transform:uppercase;margin-bottom:10px;opacity:0;animation:hfu .5s .25s ease both}
+.wc-home-title{font-size:clamp(24px,6.5vw,42px);font-weight:900;line-height:1.08;letter-spacing:-.03em;margin:0 0 6px;color:#fff;opacity:0;animation:hfu .6s .35s ease both}
+.wc-home-title em{font-style:normal;background:linear-gradient(135deg,#f5c518 0%,#fb923c 60%,#f43f5e 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.wc-home-sub{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:18px;opacity:0;animation:hfu .5s .42s ease both}
+
+/* Countdown inline */
+.wc-home-cd{display:flex;align-items:center;gap:6px;margin-bottom:22px;opacity:0;animation:hfu .5s .48s ease both}
+.wc-home-cd-unit{text-align:center;min-width:36px}
+.wc-home-cd-num{font-size:clamp(18px,5vw,28px);font-weight:900;letter-spacing:-.02em;line-height:1}
+.wc-home-cd-lbl{font-size:6px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:1px}
+.wc-home-cd-sep{font-size:20px;font-weight:900;color:rgba(255,255,255,.2);line-height:1;margin-bottom:8px;align-self:flex-start;padding-top:4px}
+
+/* CTA button */
+.wc-home-cta{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#374df5,#2c3fd4);color:#fff;font-size:14px;font-weight:800;padding:14px 28px;border-radius:14px;border:none;cursor:pointer;font-family:inherit;box-shadow:0 8px 32px rgba(55,77,245,.45);opacity:0;animation:hfu .6s .55s ease both,cta-glow 3s 1.2s ease-in-out infinite;transition:transform .2s,box-shadow .15s;letter-spacing:-.01em}
+.wc-home-cta:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(55,77,245,.6)}
+.wc-home-cta:active{transform:scale(.95)}
+@keyframes cta-glow{0%,100%{box-shadow:0 8px 32px rgba(55,77,245,.45)}50%{box-shadow:0 8px 48px rgba(55,77,245,.75),0 0 0 4px rgba(55,77,245,.12)}}
+
+/* 3 Pillar cards */
+.wc-home-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:26px 0;opacity:0;animation:hfu .6s .65s ease both}
+.wc-home-pillar{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 8px 14px;text-align:center;cursor:pointer;transition:background .2s,transform .2s,border-color .2s;backdrop-filter:blur(10px);position:relative;overflow:hidden}
+.wc-home-pillar::before{content:'';position:absolute;inset:0;background:var(--pillar-glow,transparent);opacity:0;transition:opacity .3s}
+.wc-home-pillar:hover{border-color:rgba(55,77,245,.45);transform:translateY(-3px)}
+.wc-home-pillar:hover::before{opacity:1}
+.wc-home-pillar:active{transform:scale(.95)}
+.wc-home-pillar[data-p="1"]{--pillar-glow:linear-gradient(135deg,rgba(55,77,245,.12),transparent)}
+.wc-home-pillar[data-p="2"]{--pillar-glow:linear-gradient(135deg,rgba(245,197,24,.1),transparent)}
+.wc-home-pillar[data-p="3"]{--pillar-glow:linear-gradient(135deg,rgba(6,182,212,.1),transparent)}
+.wc-home-pillar-icon{font-size:26px;margin-bottom:7px;line-height:1}
+.wc-home-pillar-name{font-size:12px;font-weight:800;color:#fff;margin-bottom:3px}
+.wc-home-pillar-sub{font-size:8px;color:var(--text3);font-weight:600;line-height:1.4}
+
+/* Partido destacado */
+.wc-home-match{position:relative;z-index:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;margin-bottom:14px;opacity:0;animation:hfu .6s .78s ease both;backdrop-filter:blur(10px)}
+.wc-home-section-lbl{font-size:8px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.wc-home-section-lbl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
+.wc-home-match-teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:12px}
+.wc-home-match-team{display:flex;flex-direction:column;align-items:center;gap:5px}
+.wc-home-match-tname{font-size:10px;font-weight:700;text-align:center;color:var(--text2);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wc-home-match-vs{font-size:9px;font-weight:800;color:var(--text3);text-align:center}
+.wc-home-match-pct{font-size:8px;color:var(--text3);text-align:center;line-height:1.6}
+.wc-home-match-bar{display:flex;height:3px;border-radius:2px;overflow:hidden;margin-bottom:12px}
+.wc-home-match-actions{display:flex;gap:8px}
+.wc-home-mbtn{flex:1;padding:9px;border-radius:10px;border:none;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit;transition:transform .15s,opacity .15s}
+.wc-home-mbtn:active{transform:scale(.94)}
+.wc-home-mbtn-sim{background:linear-gradient(135deg,rgba(55,77,245,.2),rgba(55,77,245,.1));color:#7c9dff;border:1px solid rgba(55,77,245,.3)}
+.wc-home-mbtn-pred{background:linear-gradient(135deg,rgba(245,197,24,.18),rgba(245,197,24,.08));color:#f5c518;border:1px solid rgba(245,197,24,.3)}
+
+/* Activity strip */
+.wc-home-acts{position:relative;z-index:1;margin-bottom:14px;opacity:0;animation:hfu .6s .9s ease both}
+.wc-home-acts-row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.wc-home-acts-row::-webkit-scrollbar{display:none}
+.wc-home-act-card{flex-shrink:0;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;cursor:pointer;min-width:84px;max-width:100px;text-align:center;transition:transform .2s,background .2s,border-color .2s;backdrop-filter:blur(8px)}
+.wc-home-act-card:hover{background:rgba(55,77,245,.1);border-color:rgba(55,77,245,.3);transform:translateY(-2px)}
+.wc-home-act-card:active{transform:scale(.93)}
+.wc-home-act-badge{position:relative;display:inline-block}
+.wc-home-act-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:#f43f5e;border-radius:50%;border:1.5px solid var(--bg)}
+.wc-home-act-icon{font-size:22px;margin-bottom:7px;line-height:1}
+.wc-home-act-name{font-size:10px;font-weight:800;color:#fff;margin-bottom:2px}
+.wc-home-act-sub{font-size:8px;color:var(--text3);font-weight:600}
+
+/* Community preview */
+.wc-home-community{position:relative;z-index:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;margin-bottom:8px;opacity:0;animation:hfu .6s 1.0s ease both;backdrop-filter:blur(10px)}
+.wc-home-chat-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.wc-home-chat-row:last-child{margin-bottom:0}
+.wc-home-chat-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#374df5,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.wc-home-chat-body{background:rgba(255,255,255,.05);border-radius:3px 10px 10px 10px;padding:7px 10px;flex:1;min-width:0}
+.wc-home-chat-name{font-size:8px;font-weight:800;color:#374df5;margin-bottom:2px}
+.wc-home-chat-txt{font-size:10px;color:var(--text2);line-height:1.4}
+.wc-home-chat-see{display:block;text-align:center;font-size:9px;font-weight:700;color:var(--text3);margin-top:10px;cursor:pointer;transition:color .15s;padding:4px}
+.wc-home-chat-see:hover{color:#374df5}
+
+/* Entrance animation keyframe */
+@keyframes hfu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
 /* ── HERO BANNER (tab-0 top) ── */
 /* ── HERO V4 — three column: mascots | team carousel | stats ── */
 .wc-hero{position:relative;overflow:hidden;border-radius:22px;margin-bottom:22px;background:linear-gradient(145deg,#0f1336 0%,#141840 60%,#0f1336 100%);border:1px solid rgba(55,77,245,.18)}
@@ -7554,69 +7652,213 @@ function _wcRenderHeroBanner() {
   const el = document.getElementById('wc-hero-banner');
   if (!el) return;
 
-  const totalReal = wcSimData ? 'ABCDEFGHIJKL'.split('').reduce((acc,g)=>
-    acc + Object.values(wcGroupResults[g]||{}).filter(r=>r&&r.h!==null&&r.a!==null).length, 0) : 0;
-  const pct = Math.round(totalReal / 72 * 100);
+  // XP / Level
+  const xp = parseInt(localStorage.getItem('go_xp') || '0');
+  const GO_LV = [{lv:1,min:0,label:'Hincha',next:100},{lv:2,min:100,label:'Fanático',next:300},
+    {lv:3,min:300,label:'Experto',next:700},{lv:4,min:700,label:'Leyenda',next:1500},{lv:5,min:1500,label:'Campeón',next:3000}];
+  const lv = GO_LV.slice().reverse().find(l=>xp>=l.min) || GO_LV[0];
+  const xpPct = Math.min(100, Math.round((xp - lv.min) / (lv.next - lv.min) * 100));
 
-  el.innerHTML = `<div class="wc-hero">
-    <div class="wc-hero-grid">
-
-      <!-- CENTER: TEAM CAROUSEL -->
-      <div class="wc-team-carousel" id="wc-tc">
-        <div class="wc-tc-slides" id="wc-tc-slides">
-          <!-- JS fills in -->
+  // Partido destacado — el partido más parejo del simulador
+  let featMatch = null;
+  if (wcSimData) {
+    const teams = wcSimData.teams;
+    const byGroup = {};
+    teams.forEach(t => { if(!byGroup[t.group]) byGroup[t.group]=[]; byGroup[t.group].push(t); });
+    let bestScore = Infinity;
+    for (const g of 'ABCDEFGHIJKL') {
+      const gt = byGroup[g] || [];
+      for (let i=0; i<gt.length; i++) for (let j=i+1; j<gt.length; j++) {
+        const probs = _wcMatchProbs(_wcTeamStr(gt[i].team), _wcTeamStr(gt[j].team), wcGetFormFactor(gt[i].team), wcGetFormFactor(gt[j].team));
+        const excitement = Math.abs(probs.ph - probs.pa) + Math.abs(50 - probs.pd); // closer to 50/50 = more exciting
+        if (excitement < bestScore) { bestScore = excitement; featMatch = {home:gt[i], away:gt[j], ...probs, g}; }
+      }
+    }
+  }
+  const fmHTML = featMatch ? (() => {
+    const t = featMatch.ph+featMatch.pd+featMatch.pa;
+    const bH = Math.round(featMatch.ph/t*100), bD = Math.round(featMatch.pd/t*100), bA = 100-bH-bD;
+    const cH = TEAM_COLORS?.[featMatch.home.team]||'#374df5', cA = TEAM_COLORS?.[featMatch.away.team]||'#06b6d4';
+    return `
+      <div class="wc-home-match-teams">
+        <div class="wc-home-match-team">
+          ${wcFlagImg(featMatch.home.team, 32, true)}
+          <div class="wc-home-match-tname">${featMatch.home.team}</div>
         </div>
-        <div class="wc-tc-nav">
-          <button class="wc-tc-btn" onclick="wcTcPrev()">‹</button>
-          <div style="display:flex;gap:3px;overflow:hidden;max-width:120px" id="wc-tc-dots"></div>
-          <button class="wc-tc-btn" onclick="wcTcNext()">›</button>
-          <span class="wc-tc-counter" id="wc-tc-counter">1/48</span>
+        <div class="wc-home-match-vs">
+          <div style="font-size:11px;font-weight:900;color:var(--text3)">VS</div>
+          <div style="font-size:8px;color:var(--text3);margin-top:3px">Grupo ${featMatch.g}</div>
+        </div>
+        <div class="wc-home-match-team">
+          ${wcFlagImg(featMatch.away.team, 32, true)}
+          <div class="wc-home-match-tname">${featMatch.away.team}</div>
         </div>
       </div>
-
-      <!-- RIGHT: STATS + COUNTDOWN -->
-      <div class="wc-hero-stats-col">
-        <div>
-          <div class="wc-hsc-label">El torneo</div>
-          <div class="wc-hstat-v3"><span class="wc-hstat-v3-num" data-target="48">0</span><span class="wc-hstat-v3-lbl">Selecciones</span></div>
-          <div class="wc-hstat-v3"><span class="wc-hstat-v3-num" data-target="104">0</span><span class="wc-hstat-v3-lbl">Partidos</span></div>
-          <div class="wc-hstat-v3"><span class="wc-hstat-v3-num" data-target="12">0</span><span class="wc-hstat-v3-lbl">Grupos</span></div>
-          <div class="wc-hstat-v3"><span class="wc-hstat-v3-num" data-target="16">0</span><span class="wc-hstat-v3-lbl">Ciudades sede</span></div>
-          ${totalReal > 0 ? `<div class="wc-hstat-v3"><span class="wc-hstat-v3-num" style="-webkit-text-fill-color:#10b981;background:none">${totalReal}</span><span class="wc-hstat-v3-lbl">Resultados<br>registrados</span></div>` : ''}
-        </div>
-        <div class="wc-hero-cd-v3">
-          <div class="wc-cd-v3-lbl">Comienza en</div>
-          <div class="wc-cd-v3-row">
-            <div class="wc-cd-v3-unit"><span class="wc-cd-v3-num" id="wc2-d">--</span><span class="wc-cd-v3-sub">días</span></div>
-            <div class="wc-cd-v3-sep">:</div>
-            <div class="wc-cd-v3-unit"><span class="wc-cd-v3-num" id="wc2-h">--</span><span class="wc-cd-v3-sub">h</span></div>
-            <div class="wc-cd-v3-sep">:</div>
-            <div class="wc-cd-v3-unit"><span class="wc-cd-v3-num" id="wc2-m">--</span><span class="wc-cd-v3-sub">m</span></div>
-            <div class="wc-cd-v3-sep">:</div>
-            <div class="wc-cd-v3-unit"><span class="wc-cd-v3-num" id="wc2-s">--</span><span class="wc-cd-v3-sub">s</span></div>
-          </div>
-        </div>
+      <div class="wc-home-match-pct" style="text-align:center;margin-bottom:8px;font-size:9px;color:var(--text3)">
+        ${featMatch.ph.toFixed(0)}% — ${featMatch.pd.toFixed(0)}% — ${featMatch.pa.toFixed(0)}%
       </div>
+      <div class="wc-home-match-bar">
+        <div style="flex:${bH};background:${cH};opacity:.7"></div>
+        <div style="flex:${bD};background:rgba(255,255,255,.12)"></div>
+        <div style="flex:${bA};background:${cA};opacity:.7"></div>
+      </div>
+      <div class="wc-home-match-actions">
+        <button class="wc-home-mbtn wc-home-mbtn-sim" onclick="showTab(0,event);setTimeout(()=>document.getElementById('groups-container')?.scrollIntoView({behavior:'smooth'}),200)">⚡ Simular</button>
+        <button class="wc-home-mbtn wc-home-mbtn-pred" onclick="${wcUser?`wcPredictMatch('${featMatch.g}',0,'${featMatch.home.team.replace(/'/g,"\\'")}','${featMatch.away.team.replace(/'/g,"\\'")}')`:``}${!wcUser?`wcShowAuthModal()`:``}">🔮 Predecir</button>
+      </div>`;
+  })() : `<div style="text-align:center;color:var(--text3);font-size:11px;padding:12px 0">Cargando partido...</div>`;
 
+  el.innerHTML = `
+  <div class="wc-home">
+    <!-- Atmosphere -->
+    <div class="wc-home-bg">
+      <div class="wc-home-orb wc-home-orb-1"></div>
+      <div class="wc-home-orb wc-home-orb-2"></div>
+      <div class="wc-home-orb wc-home-orb-3"></div>
     </div>
-    <div id="wc-countdown" style="display:none"></div>
-  </div>
-`;
 
-  // Animate number counters
-  el.querySelectorAll('[data-target]').forEach(numEl => {
-    const target = parseInt(numEl.dataset.target);
-    let current = 0;
-    const step = Math.ceil(target / 30);
-    const t = setInterval(() => {
-      current = Math.min(current + step, target);
-      numEl.textContent = current;
-      if (current >= target) clearInterval(t);
-    }, 28);
-  });
+    <!-- XP Bar -->
+    <div class="wc-home-xp">
+      <span class="wc-home-xp-lv">Lv.${lv.lv} ${lv.label}</span>
+      <div class="wc-home-xp-track"><div class="wc-home-xp-fill" id="wc-home-xp-fill" style="width:0%"></div></div>
+      <span class="wc-home-xp-pts">${xp}/${lv.next} xp</span>
+    </div>
 
-  // Init team carousel + countdown
-  setTimeout(() => { wcInitTeamCarousel(); wcInitCountdown(); }, 50);
+    <!-- Hero -->
+    <div class="wc-home-hero">
+      <div class="wc-home-eyebrow">⚽ FIFA WORLD CUP 2026 · USA · CAN · MEX</div>
+      <h1 class="wc-home-title">Simula, compite<br>y predice el<br><em>Mundial 2026</em></h1>
+      <div class="wc-home-sub">Simulador con IA · Rankings · Álbum · Quiz</div>
+
+      <!-- Countdown -->
+      <div class="wc-home-cd" id="wc-home-cd">
+        <div class="wc-home-cd-unit"><div class="wc-home-cd-num" id="wch-d">--</div><div class="wc-home-cd-lbl">días</div></div>
+        <div class="wc-home-cd-sep">:</div>
+        <div class="wc-home-cd-unit"><div class="wc-home-cd-num" id="wch-h">--</div><div class="wc-home-cd-lbl">horas</div></div>
+        <div class="wc-home-cd-sep">:</div>
+        <div class="wc-home-cd-unit"><div class="wc-home-cd-num" id="wch-m">--</div><div class="wc-home-cd-lbl">min</div></div>
+        <div class="wc-home-cd-sep">:</div>
+        <div class="wc-home-cd-unit"><div class="wc-home-cd-num" id="wch-s">--</div><div class="wc-home-cd-lbl">seg</div></div>
+      </div>
+
+      <button class="wc-home-cta" onclick="showTab(0,event);_wcMobileNavActive(0);setTimeout(()=>document.getElementById('groups-container')?.scrollIntoView({behavior:'smooth'}),200)">
+        ⚡ Empezar simulación
+      </button>
+    </div>
+
+    <!-- 3 Pillar cards -->
+    <div class="wc-home-pillars">
+      <div class="wc-home-pillar" data-p="1" onclick="showTab(0,event);_wcMobileNavActive(0);setTimeout(()=>document.getElementById('groups-container')?.scrollIntoView({behavior:'smooth'}),200)">
+        <div class="wc-home-pillar-icon">⚽</div>
+        <div class="wc-home-pillar-name">Simular</div>
+        <div class="wc-home-pillar-sub">Grupos · Bracket · Partidos</div>
+      </div>
+      <div class="wc-home-pillar" data-p="2" onclick="showTab(4,event);_wcMobileNavActive(4)">
+        <div class="wc-home-pillar-icon">🏆</div>
+        <div class="wc-home-pillar-name">Competir</div>
+        <div class="wc-home-pillar-sub">Rankings · Predicciones</div>
+      </div>
+      <div class="wc-home-pillar" data-p="3" onclick="showTab(5,event);_wcMobileNavActive(5)">
+        <div class="wc-home-pillar-icon">📦</div>
+        <div class="wc-home-pillar-name">Coleccionar</div>
+        <div class="wc-home-pillar-sub">Álbum · Cartas · XP</div>
+      </div>
+    </div>
+
+    <!-- Partido destacado -->
+    <div class="wc-home-match">
+      <div class="wc-home-section-lbl" style="color:#f5c518">⚡ PARTIDO DESTACADO</div>
+      ${fmHTML}
+    </div>
+
+    <!-- Activity strip -->
+    <div class="wc-home-acts">
+      <div class="wc-home-section-lbl" style="color:var(--text3)">TU ACTIVIDAD</div>
+      <div class="wc-home-acts-row">
+        <div class="wc-home-act-card" onclick="wcShowQuizTab(event)">
+          <div class="wc-home-act-badge"><div class="wc-home-act-icon">🧠</div><div class="wc-home-act-dot"></div></div>
+          <div class="wc-home-act-name">Quiz</div>
+          <div class="wc-home-act-sub">+50 XP</div>
+        </div>
+        <div class="wc-home-act-card" onclick="showTab(5,event);_wcMobileNavActive(5)">
+          <div class="wc-home-act-badge"><div class="wc-home-act-icon">📦</div><div class="wc-home-act-dot"></div></div>
+          <div class="wc-home-act-name">Sobres</div>
+          <div class="wc-home-act-sub">Abrir hoy</div>
+        </div>
+        <div class="wc-home-act-card" onclick="showTab(2,event);_wcMobileNavActive(2)">
+          <div class="wc-home-act-icon">📊</div>
+          <div class="wc-home-act-name">Pronóstico</div>
+          <div class="wc-home-act-sub">IA activa</div>
+        </div>
+        <div class="wc-home-act-card" onclick="showTab(4,event);_wcMobileNavActive(4)">
+          <div class="wc-home-act-icon">🏅</div>
+          <div class="wc-home-act-name">Quiniela</div>
+          <div class="wc-home-act-sub">Tu ranking</div>
+        </div>
+        <div class="wc-home-act-card" onclick="wcShowBetPane(event)">
+          <div class="wc-home-act-badge"><div class="wc-home-act-icon">🎰</div><div class="wc-home-act-dot" style="background:#f5c518"></div></div>
+          <div class="wc-home-act-name">Apuestas IA</div>
+          <div class="wc-home-act-sub">Picks nuevos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Community preview -->
+    <div class="wc-home-community">
+      <div class="wc-home-section-lbl" style="color:var(--text3)">💬 COMUNIDAD
+        <span onclick="wcShowChat&&wcShowChat()" style="font-size:8px;color:#374df5;cursor:pointer;font-weight:700;text-transform:none;letter-spacing:0;margin-left:auto">Ver todo →</span>
+      </div>
+      <div id="wc-home-chat-preview">
+        <div class="wc-home-chat-row">
+          <div class="wc-home-chat-av">⚽</div>
+          <div class="wc-home-chat-body"><div class="wc-home-chat-name">Chat del Mundial</div><div class="wc-home-chat-txt">¡Bienvenido al Mundial 2026! 🏆 Simula y predice tus resultados.</div></div>
+        </div>
+      </div>
+      <span class="wc-home-chat-see" onclick="wcShowChat&&wcShowChat()">Ver toda la conversación →</span>
+    </div>
+  </div>`;
+
+  // XP bar animation (delayed so CSS transition triggers)
+  setTimeout(() => {
+    const fill = document.getElementById('wc-home-xp-fill');
+    if (fill) fill.style.width = xpPct + '%';
+  }, 300);
+
+  // Countdown inline
+  function _homeCountdown() {
+    const target = new Date('2026-06-11T16:00:00Z');
+    const now = new Date();
+    const diff = target - now;
+    if (diff <= 0) {
+      ['wch-d','wch-h','wch-m','wch-s'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent='00'; });
+      return;
+    }
+    const d=Math.floor(diff/864e5), h=Math.floor(diff%864e5/36e5), m=Math.floor(diff%36e5/6e4), s=Math.floor(diff%6e4/1e3);
+    const fmt=n=>String(n).padStart(2,'0');
+    const ids={d,h,m,s};
+    Object.entries(ids).forEach(([k,v])=>{ const e=document.getElementById('wch-'+k); if(e) e.textContent=fmt(v); });
+  }
+  _homeCountdown();
+  if (window._homeCountdownTimer) clearInterval(window._homeCountdownTimer);
+  window._homeCountdownTimer = setInterval(_homeCountdown, 1000);
+
+  // Load chat preview from Supabase if available
+  if (typeof supabase !== 'undefined') {
+    supabase.from('chat_messages').select('username,message,created_at').order('created_at',{ascending:false}).limit(2)
+      .then(({data}) => {
+        if (!data || !data.length) return;
+        const prev = document.getElementById('wc-home-chat-preview');
+        if (!prev) return;
+        prev.innerHTML = data.reverse().map(m => `
+          <div class="wc-home-chat-row">
+            <div class="wc-home-chat-av" style="font-size:13px">${(m.username||'?')[0].toUpperCase()}</div>
+            <div class="wc-home-chat-body">
+              <div class="wc-home-chat-name">${m.username||'Anónimo'}</div>
+              <div class="wc-home-chat-txt">${(m.message||'').slice(0,80)}${m.message&&m.message.length>80?'…':''}</div>
+            </div>
+          </div>`).join('');
+      }).catch(()=>{});
+  }
 }
 
 // ─── VIDEO BACKGROUND SYSTEM ──────────────────────────────────────────────────

@@ -1521,7 +1521,7 @@ body{display:flex;flex-direction:column}
 .app-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .app-title{font-size:20px;font-weight:900;letter-spacing:-.5px;background:linear-gradient(90deg,#374df5,#2c3fd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .app-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.app-tabs{display:flex;gap:2px;padding:0 20px;background:var(--surface);border-bottom:1px solid rgba(55,77,245,.3);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}.app-tabs::-webkit-scrollbar{display:none}
+.app-tabs{display:none!important}
 .app-tab-btn{padding:10px 20px;border:none;background:none;color:var(--text3);font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;transition:color .2s,background .2s;white-space:nowrap;position:relative;overflow:hidden}
 .app-tab-btn::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:#374df5;border-radius:1px 1px 0 0;transition:width .25s ease}
 .app-tab-btn:hover:not(.active){color:var(--text2);background:rgba(255,255,255,.025)}
@@ -2065,13 +2065,78 @@ input.wc-chaos-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;he
 /* ── SIMULATE BUTTON PULSE ─────────────────────────────────────── */
 @keyframes sim-pulse{0%,100%{box-shadow:0 0 0 0 rgba(55,77,245,.4)}50%{box-shadow:0 0 0 6px rgba(55,77,245,0)}}
 .sim-btn-running{animation:sim-pulse .6s ease-in-out infinite!important}
+/* ══════════════════════════════════════════════════════════════════
+   PHASE C — GLASSMORPHISM + VISUAL POLISH
+══════════════════════════════════════════════════════════════════ */
+/* Glassmorphism utility */
+.glass{background:rgba(255,255,255,.03)!important;border:1px solid rgba(255,255,255,.08)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important}
+.glass-strong{background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.12)!important;backdrop-filter:blur(20px)!important}
+
+/* Shimmer skeleton loader */
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.skeleton{background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);background-size:800px 100%;animation:shimmer 1.6s infinite linear;border-radius:8px}
+
+/* Premium card hover */
+.wc-group-card,.match-card,.wc-value-card{transition:transform .22s cubic-bezier(.4,0,.2,1),box-shadow .22s,border-color .22s!important}
+.wc-group-card:hover{transform:translateY(-3px)!important;box-shadow:0 12px 32px rgba(55,77,245,.18)!important;border-color:rgba(55,77,245,.35)!important}
+
+/* Subnav bar */
+#wc-pillar-subnav{border-bottom:1px solid var(--border);background:var(--bg);backdrop-filter:blur(12px)}
+#wc-pillar-subnav::-webkit-scrollbar{display:none}
+#wc-pillar-subnav button:focus{outline:none}
+
+/* Button microinteractions */
+.wc-home-cta,.btn,.wc-bt,.wc-auth-btn{will-change:transform}
+
+/* Typography improvements */
+h1,h2,.wc-home-title{font-feature-settings:"ss01","kern";text-rendering:optimizeLegibility}
+
+/* Phase C — Deeper premium bg for home section */
+#tab-0 .wc-home{background:linear-gradient(180deg,#04070f 0%,var(--bg) 100%)}
+
+/* ══════════════════════════════════════════════════════════════════
+   PHASE D — ONBOARDING MODAL
+══════════════════════════════════════════════════════════════════ */
+#wc-onboarding{position:fixed;inset:0;z-index:99990;background:rgba(4,7,15,.96);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;padding:20px}
+.wc-ob-card{background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:32px 24px;max-width:360px;width:100%;text-align:center;animation:ob-in .5s cubic-bezier(.22,1,.36,1) both}
+@keyframes ob-in{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.wc-ob-step{display:none}.wc-ob-step.active{display:block}
+.wc-ob-icon{font-size:52px;margin-bottom:16px;line-height:1}
+.wc-ob-title{font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:8px;color:#fff}
+.wc-ob-sub{font-size:13px;color:var(--text3);margin-bottom:24px;line-height:1.5}
+.wc-ob-teams{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.wc-ob-team{background:rgba(255,255,255,.04);border:2px solid transparent;border-radius:12px;padding:10px 6px;cursor:pointer;transition:all .2s;text-align:center}
+.wc-ob-team:hover,.wc-ob-team.sel{background:rgba(55,77,245,.15);border-color:#374df5}
+.wc-ob-team-flag{font-size:24px;margin-bottom:4px}
+.wc-ob-team-name{font-size:8px;font-weight:700;color:var(--text2)}
+.wc-ob-btn{width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#374df5,#2c3fd4);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:transform .15s,opacity .15s}
+.wc-ob-btn:hover{transform:translateY(-1px)}
+.wc-ob-btn:active{transform:scale(.96)}
+.wc-ob-btn:disabled{opacity:.5;pointer-events:none}
+.wc-ob-skip{display:block;margin-top:12px;font-size:11px;color:var(--text3);cursor:pointer;padding:8px;transition:color .15s}
+.wc-ob-skip:hover{color:var(--text2)}
+.wc-ob-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
+.wc-ob-dot{width:6px;height:6px;border-radius:50%;background:var(--surface3);transition:all .3s}
+.wc-ob-dot.active{width:20px;border-radius:3px;background:#374df5}
+
+/* ══════════════════════════════════════════════════════════════════
+   PHASE E — CONTEXTUAL MONETIZATION
+══════════════════════════════════════════════════════════════════ */
+.wc-ctx-upgrade{background:linear-gradient(135deg,rgba(55,77,245,.12),rgba(245,197,24,.08));border:1px solid rgba(55,77,245,.25);border-radius:14px;padding:14px 16px;margin:12px 0;display:flex;align-items:center;gap:12px}
+.wc-ctx-upgrade-icon{font-size:24px;flex-shrink:0}
+.wc-ctx-upgrade-body{flex:1}
+.wc-ctx-upgrade-title{font-size:11px;font-weight:800;color:#fff;margin-bottom:2px}
+.wc-ctx-upgrade-sub{font-size:9px;color:var(--text3);font-weight:600}
+.wc-ctx-upgrade-btn{flex-shrink:0;background:linear-gradient(135deg,#374df5,#2c3fd4);border:none;color:#fff;font-size:9px;font-weight:800;padding:7px 12px;border-radius:9px;cursor:pointer;font-family:inherit;white-space:nowrap}
+
 /* ── Mobile bottom nav ──────────────────────────────────────────── */
+/* Bottom nav always visible — pillar navigation replaces old tabs */
+.wc-mobile-nav{display:flex!important}
+.app-body{padding-bottom:64px}
 @media(max-width:640px){
   .app-tabs{display:none!important}
-  .wc-mobile-nav{display:flex!important}
-  .app-body{padding-bottom:64px}
 }
-.wc-mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;
+.wc-mobile-nav{position:fixed;bottom:0;left:0;right:0;z-index:300;
   background:var(--surface);border-top:1px solid var(--border);
   padding:0 4px env(safe-area-inset-bottom,0);
   backdrop-filter:blur(16px);height:56px;align-items:stretch;
@@ -2735,19 +2800,41 @@ button:active{transform:scale(.96)!important}
 
 <!-- Mobile bottom nav -->
 <nav class="wc-mobile-nav" id="wc-mobile-nav">
-  <button class="wc-mobile-nav-btn active" onclick="showTab(0,event);_wcMobileNavActive(0)"><span class="mnav-icon">🏟️</span><span class="mnav-lbl">Grupos</span></button>
-  <button class="wc-mobile-nav-btn" onclick="showTab(1,event);_wcMobileNavActive(1)"><span class="mnav-icon">🏆</span><span class="mnav-lbl">Llave</span></button>
-  <button class="wc-mobile-nav-btn" onclick="showTab(2,event);_wcMobileNavActive(2)"><span class="mnav-icon">📊</span><span class="mnav-lbl">Pronós.</span></button>
-  <button class="wc-mobile-nav-btn" onclick="showTab(3,event);_wcMobileNavActive(3)"><span class="mnav-icon">⚽</span><span class="mnav-lbl">Goleador</span></button>
-  <button class="wc-mobile-nav-btn" onclick="showTab(4,event);_wcMobileNavActive(4)"><span class="mnav-icon">🏅</span><span class="mnav-lbl">Quiniela</span></button>
-  <button class="wc-mobile-nav-btn" onclick="showTab(5,event);_wcMobileNavActive(5)"><span class="mnav-icon">📦</span><span class="mnav-lbl">Álbum</span></button>
-  <button class="wc-mobile-nav-btn" onclick="wcShowQuizTab(event);_wcMobileNavActive(6)"><span class="mnav-icon">🧠</span><span class="mnav-lbl">Quiz</span></button>
-  <button class="wc-mobile-nav-btn" onclick="wcShowBetPane(event);_wcMobileNavActive(7)"><span class="mnav-icon">🎰</span><span class="mnav-lbl">Apuestas</span></button>
+  <button class="wc-mobile-nav-btn active" id="pnav-home" onclick="showPillar('home',this)"><span class="mnav-icon">🏠</span><span class="mnav-lbl">Home</span></button>
+  <button class="wc-mobile-nav-btn" id="pnav-simular" onclick="showPillar('simular',this)"><span class="mnav-icon">⚽</span><span class="mnav-lbl">Simular</span></button>
+  <button class="wc-mobile-nav-btn" id="pnav-competir" onclick="showPillar('competir',this)"><span class="mnav-icon">🏆</span><span class="mnav-lbl">Competir</span></button>
+  <button class="wc-mobile-nav-btn" id="pnav-coleccionar" onclick="showPillar('coleccionar',this)"><span class="mnav-icon">📦</span><span class="mnav-lbl">Coleccionar</span></button>
 </nav>
 <!-- Apuestas IA pane -->
 <div id="wc-bet-pane"></div>
 <!-- Quiz pane -->
 <div id="wc-quiz-pane" style="display:none;position:fixed;inset:0;bottom:56px;z-index:5000;overflow-y:auto;background:#080c24"></div>
+<!-- ── ONBOARDING MODAL (Phase D) ── -->
+<div id="wc-onboarding" style="display:none">
+  <div class="wc-ob-card">
+    <div class="wc-ob-dots"><div class="wc-ob-dot active" id="ob-dot-0"></div><div class="wc-ob-dot" id="ob-dot-1"></div></div>
+    <!-- Step 0: Elige tu selección -->
+    <div class="wc-ob-step active" id="ob-step-0">
+      <div class="wc-ob-icon">🏆</div>
+      <div class="wc-ob-title">Bienvenido al<br>Mundial 2026</div>
+      <div class="wc-ob-sub">¿Cuál es tu selección?</div>
+      <div class="wc-ob-teams" id="ob-teams-grid"></div>
+      <button class="wc-ob-btn" id="ob-btn-0" onclick="wcObNext()" disabled>Continuar →</button>
+    </div>
+    <!-- Step 1: Simula tu primer partido -->
+    <div class="wc-ob-step" id="ob-step-1">
+      <div class="wc-ob-icon">⚽</div>
+      <div class="wc-ob-title">¡Simula tu<br>primer partido!</div>
+      <div class="wc-ob-sub">Tu selección <span id="ob-team-name" style="color:#f5c518;font-weight:800"></span> ya está lista.<br>Predice, compite y gana XP.</div>
+      <div style="background:rgba(55,77,245,.1);border:1px solid rgba(55,77,245,.2);border-radius:12px;padding:14px;margin-bottom:20px;text-align:left">
+        <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:8px;letter-spacing:1px">LO QUE PUEDES HACER</div>
+        ${['⚽ Simular todos los partidos del Mundial','🏆 Predecir el campeón con IA','📦 Coleccionar cartas de jugadores','🧠 Quiz de conocimiento futbolero','🏅 Competir en el ranking global'].map(f=>`<div style="font-size:11px;color:var(--text2);padding:4px 0;display:flex;align-items:center;gap:8px">${f}</div>`).join('')}
+      </div>
+      <button class="wc-ob-btn" onclick="wcObFinish()">⚡ Empezar simulación</button>
+    </div>
+    <span class="wc-ob-skip" onclick="wcObFinish()">Saltar →</span>
+  </div>
+</div>
 <!-- Champion reveal modal -->
 <div id="wc-champ-modal" onclick="wcCloseChampModal()">
   <div class="wc-champ-inner" onclick="event.stopPropagation()">
@@ -2928,6 +3015,7 @@ button:active{transform:scale(.96)!important}
     <button class="app-tab-btn" onclick="wcShowBetPane(event)" id="bet-tab-btn">🎰 Apuestas IA</button>
     <div id="tab-indicator"></div>
   </div>
+  <div id="wc-pillar-subnav" style="display:none;position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:0 20px;flex-shrink:0"></div>
   <div class="app-content">
     <div class="app-tab-pane active" id="tab-0">
       <div id="wc-hero-banner"></div>
@@ -7276,11 +7364,199 @@ function _wcMoveTabIndicator(idx) {
 }
 
 function _wcMobileNavActive(idx) {
-  document.querySelectorAll('.wc-mobile-nav-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  // Legacy: map old tab index to pillar nav
+  const pillarMap = {0:'simular',1:'simular',2:'simular',3:'simular',4:'competir',5:'coleccionar',6:'competir'};
+  const pillar = pillarMap[idx];
+  if (pillar) {
+    document.querySelectorAll('.wc-mobile-nav-btn').forEach(b => {
+      b.classList.toggle('active', b.id === 'pnav-'+pillar);
+    });
+  }
+}
+
+// ─── PILLAR NAVIGATION SYSTEM ─────────────────────────────────────────────────
+const _PILLAR_DEFS = {
+  home: { tabs: [] },
+  simular: {
+    tabs: [
+      { label:'🏟️ Grupos',     idx:0, render:()=>{ if(!wcSimData&&typeof wcBuildClientSimData==='function')wcBuildClientSimData(); if(wcSimData)_renderGroups(); } },
+      { label:'🏆 Bracket',    idx:1, render:()=>{ if(!wcSimData&&typeof wcBuildClientSimData==='function')wcBuildClientSimData(); if(wcSimData){if(!wcBracketMatches)wcInitBracket();wcRenderBracket();wcShowUpsets();} } },
+      { label:'📊 Pronóstico', idx:2, render:()=>{ if(wcSimData){window.wcCurrentView==='live'?wcRenderLive():_renderProbs();} } },
+      { label:'⚽ Goleadores',  idx:3, render:()=>{ wcRenderScorers(); }, pro:true },
+    ]
+  },
+  competir: {
+    tabs: [
+      { label:'🏅 Quiniela',   idx:4, render:()=>{ wcRenderOfflineQuiniela(); } },
+      { label:'💰 Portafolio', idx:6, render:()=>{ wcRenderPortfolio(); } },
+      { label:'🎰 Apuestas IA',idx:-1,render:()=>{ wcShowBetPane(); } },
+    ]
+  },
+  coleccionar: {
+    tabs: [
+      { label:'📦 Álbum',      idx:5, render:()=>{ wcRenderAlbum(); } },
+      { label:'🧠 Quiz',        idx:-1,render:()=>{ wcShowQuizTab(); } },
+    ]
+  }
+};
+
+let _activePillar = 'home';
+let _activeSubIdx = 0;
+
+function showPillar(name, navBtn) {
+  _activePillar = name;
+
+  // Update bottom nav active state
+  document.querySelectorAll('.wc-mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  if (navBtn) navBtn.classList.add('active');
+  else { const b = document.getElementById('pnav-'+name); if(b) b.classList.add('active'); }
+
+  // Home: just show tab-0 hero, hide subnav
+  if (name === 'home') {
+    _wcShowTabPane(0);
+    const sub = document.getElementById('wc-pillar-subnav');
+    if (sub) sub.style.display = 'none';
+    if (!wcSimData && typeof wcBuildClientSimData==='function') wcBuildClientSimData();
+    _wcRenderHeroBanner();
+    return;
+  }
+
+  // Show subnav bar
+  _wcRenderSubnav(name, 0);
+
+  // Activate first tab of pillar
+  const def = _PILLAR_DEFS[name];
+  if (def && def.tabs.length) {
+    _activateSubTab(name, 0);
+  }
+}
+
+function _wcRenderSubnav(pillar, activeI) {
+  const bar = document.getElementById('wc-pillar-subnav');
+  if (!bar) return;
+  const tabs = (_PILLAR_DEFS[pillar]||{}).tabs || [];
+  bar.style.display = 'flex';
+  bar.innerHTML = `<div style="display:flex;gap:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch">${
+    tabs.map((t,i) => `
+      <button onclick="showSubTab('${pillar}',${i})" id="psubnav-${pillar}-${i}"
+        style="flex-shrink:0;padding:10px 14px;border:none;background:none;color:${i===activeI?'#374df5':'var(--text3)'};
+        font-size:11px;font-weight:${i===activeI?'800':'600'};cursor:pointer;font-family:inherit;
+        border-bottom:2px solid ${i===activeI?'#374df5':'transparent'};transition:all .2s;white-space:nowrap">
+        ${t.label}${t.pro?'<span style="font-size:7px;background:rgba(155,114,232,.25);color:#b594f0;padding:1px 4px;border-radius:3px;margin-left:4px">PRO</span>':''}
+      </button>`
+    ).join('')
+  }</div>`;
+}
+
+function showSubTab(pillar, i) {
+  _activeSubIdx = i;
+  // Re-render subnav with new active
+  _wcRenderSubnav(pillar, i);
+  _activateSubTab(pillar, i);
+}
+
+function _activateSubTab(pillar, i) {
+  const def = _PILLAR_DEFS[pillar];
+  if (!def || !def.tabs[i]) return;
+  const tab = def.tabs[i];
+
+  if (tab.pro && !window.wcIsPremium) { wcShowPaywall(); return; }
+
+  if (tab.idx === -1) {
+    // Overlay tabs (Quiz, Apuestas) — don't switch pane, just call render
+    tab.render();
+    return;
+  }
+
+  _wcShowTabPane(tab.idx);
+  setTimeout(() => tab.render(), 50);
+}
+
+function _wcShowTabPane(idx) {
+  document.querySelectorAll('.app-tab-pane').forEach((p,i) => p.classList.toggle('active', i===idx));
+  // Scroll content to top
+  const content = document.querySelector('.app-content');
+  if (content) content.scrollTop = 0;
 }
 
 // Init indicator on load
-window.addEventListener('load', () => setTimeout(() => _wcMoveTabIndicator(0), 400));
+window.addEventListener('load', () => {
+  setTimeout(() => _wcMoveTabIndicator(0), 400);
+  // Hide desktop top tabs (pillar nav replaces them on mobile)
+  const topTabs = document.getElementById('app-tabs');
+  if (topTabs) topTabs.style.display = 'none';
+  // Default pillar = home
+  setTimeout(() => showPillar('home'), 100);
+  // Show onboarding on first visit
+  setTimeout(wcObMaybeShow, 1800);
+});
+
+// ─── PHASE D: ONBOARDING ──────────────────────────────────────────────────────
+const _OB_TEAMS = [
+  {name:'España',flag:'🇪🇸'},{name:'Argentina',flag:'🇦🇷'},{name:'Brasil',flag:'🇧🇷'},
+  {name:'Francia',flag:'🇫🇷'},{name:'Alemania',flag:'🇩🇪'},{name:'Inglaterra',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
+  {name:'Portugal',flag:'🇵🇹'},{name:'México',flag:'🇲🇽'},{name:'USA',flag:'🇺🇸'},
+  {name:'Colombia',flag:'🇨🇴'},{name:'Países Bajos',flag:'🇳🇱'},{name:'Uruguay',flag:'🇺🇾'}
+];
+let _obSelectedTeam = null;
+
+function wcObMaybeShow() {
+  if (localStorage.getItem('wc_ob_done')) return;
+  const modal = document.getElementById('wc-onboarding');
+  if (!modal) return;
+  // Render team grid
+  const grid = document.getElementById('ob-teams-grid');
+  if (grid) grid.innerHTML = _OB_TEAMS.map((t,i) => `
+    <div class="wc-ob-team" id="ob-t-${i}" onclick="wcObSelectTeam(${i})">
+      <div class="wc-ob-team-flag">${t.flag}</div>
+      <div class="wc-ob-team-name">${t.name}</div>
+    </div>`).join('');
+  modal.style.display = 'flex';
+}
+
+function wcObSelectTeam(i) {
+  _obSelectedTeam = _OB_TEAMS[i];
+  document.querySelectorAll('.wc-ob-team').forEach((el,j) => el.classList.toggle('sel', j===i));
+  const btn = document.getElementById('ob-btn-0');
+  if (btn) btn.disabled = false;
+}
+
+function wcObNext() {
+  document.getElementById('ob-step-0').classList.remove('active');
+  document.getElementById('ob-step-1').classList.add('active');
+  document.getElementById('ob-dot-0').classList.remove('active');
+  document.getElementById('ob-dot-1').classList.add('active');
+  const nm = document.getElementById('ob-team-name');
+  if (nm && _obSelectedTeam) nm.textContent = (_obSelectedTeam.flag + ' ' + _obSelectedTeam.name);
+}
+
+function wcObFinish() {
+  localStorage.setItem('wc_ob_done', '1');
+  if (_obSelectedTeam) localStorage.setItem('wc_fav_team', JSON.stringify(_obSelectedTeam));
+  const modal = document.getElementById('wc-onboarding');
+  if (modal) { modal.style.opacity='0'; modal.style.transition='opacity .4s'; setTimeout(()=>modal.style.display='none',400); }
+  showPillar('simular', document.getElementById('pnav-simular'));
+}
+
+// ─── PHASE E: CONTEXTUAL UPGRADE PROMPT ───────────────────────────────────────
+function wcShowContextualUpgrade(ctx) {
+  if (window.wcIsPremium) return '';
+  const msgs = {
+    stats:    { icon:'📊', title:'Estadísticas avanzadas', sub:'Análisis IA profundo de cada equipo', btn:'Ver estadísticas Élite' },
+    scorer:   { icon:'⚽', title:'Goleadores Pro', sub:'Predicciones de goleador con probabilidades IA', btn:'Desbloquear Goleadores' },
+    album:    { icon:'📦', title:'Sobres ilimitados', sub:'Élite abre sobres sin límite diario', btn:'Obtener Élite' },
+    apuestas: { icon:'🎰', title:'Apuestas IA Premium', sub:'Picks exclusivos con mayor precisión', btn:'Activar picks Premium' },
+  };
+  const m = msgs[ctx] || msgs.stats;
+  return `<div class="wc-ctx-upgrade">
+    <div class="wc-ctx-upgrade-icon">${m.icon}</div>
+    <div class="wc-ctx-upgrade-body">
+      <div class="wc-ctx-upgrade-title">${m.title}</div>
+      <div class="wc-ctx-upgrade-sub">${m.sub}</div>
+    </div>
+    <button class="wc-ctx-upgrade-btn" onclick="wcShowPaywall()">✦ ${m.btn}</button>
+  </div>`;
+}
 
 
 // ─── MATCH & GROUP SIMULATOR MODAL ────────────────────────────────────────────

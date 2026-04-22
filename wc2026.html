@@ -3104,6 +3104,9 @@ button:active{transform:scale(.96)!important}
     <div class="app-tab-pane" id="tab-6">
       <div id="portfolio-container"></div>
     </div>
+    <div class="app-tab-pane" id="tab-7">
+      <div id="trackrecord-container"></div>
+    </div>
   </div>
 
 <!-- ── RUNNER GAME ── -->
@@ -3401,6 +3404,9 @@ function wcGroupScoreInput(g, mi, side, val) {
         wcSyncEloToSimData();
         _showEloToast(gt[i].team, gt[j].team, r.h, r.a);
         if (typeof wcMascotCelebrate === 'function') wcMascotCelebrate();
+        // Record actual winner for track record
+        const _mWinner = r.h > r.a ? 'home' : r.h === r.a ? 'draw' : 'away';
+        if (typeof wcSetPredictionResult === 'function') wcSetPredictionResult(wcMatchId(g, mi), _mWinner);
         // Re-simular partidos pendientes con ELOs actualizados y actualizar bracket
         _wcResimPending();
         return;
@@ -6513,6 +6519,11 @@ function _wcRenderSingleGroup(g, gTeams, isPremium, cardIdx) {
   matches.forEach((m, mi) => {
     const rH = res[mi]?.h, rA = res[mi]?.a;
     const hasResult = rH!==null&&rH!==undefined&&rA!==null&&rA!==undefined;
+    // Auto-save model prediction to Supabase BEFORE result is known
+    if (!hasResult && typeof wcAutoSaveModelPrediction === 'function') {
+      const _mid = wcMatchId(g, mi);
+      setTimeout(() => wcAutoSaveModelPrediction(_mid, m.home.team, m.away.team, m.ph, m.pd, m.pa), 300 + mi*60);
+    }
     const cH = TEAM_COLORS[m.home.team]||'#374df5';
     const cA = TEAM_COLORS[m.away.team]||'#0891b2';
     const total = m.ph+m.pd+m.pa;
@@ -7400,6 +7411,7 @@ const _PILLAR_DEFS = {
   },
   competir: {
     tabs: [
+      { label:'📈 Track Record',idx:7, render:()=>{ wcRenderTrackRecord(); } },
       { label:'🏅 Quiniela',   idx:4, render:()=>{ wcRenderOfflineQuiniela(); } },
       { label:'💰 Portafolio', idx:6, render:()=>{ wcRenderPortfolio(); } },
       { label:'🎰 Apuestas IA',idx:-1,render:()=>{ wcShowBetPane(); } },
@@ -10634,6 +10646,9 @@ async function wcPredictMatch(g,mi,homeTeam,awayTeam) {
     await sb.from('match_results').upsert({match_id:mid,home_team:homeTeam,away_team:awayTeam,home_score:predH,away_score:predA,result_set_at:new Date().toISOString()},{onConflict:'match_id'});
     wcOfficialResults[mid]={match_id:mid,home_score:predH,away_score:predA};
     _setPredStatus(g,mi,`🏆 Resultado oficial: ${predH}–${predA}`,'#374df5');
+    // Record actual winner for track record
+    const _aw = predH > predA ? 'home' : predH === predA ? 'draw' : 'away';
+    if (typeof wcSetPredictionResult === 'function') wcSetPredictionResult(mid, _aw);
     await wcLoadLeaderboard();
   }
 }
@@ -10661,6 +10676,142 @@ function wcGetPredDisplay(g,mi){
     html+=`<div id="pred-status-${g}-${mi}" style="font-size:8px;min-height:10px;margin-top:2px"></div>`;
   }
   return html;
+}
+
+// ─── MODEL TRACK RECORD ──────────────────────────────────────────────────────
+let wcModelPredictions = {};
+let wcSavedPredIds = new Set(JSON.parse(localStorage.getItem('wc_saved_pred_ids')||'[]'));
+
+async function wcAutoSaveModelPrediction(matchId, homeTeam, awayTeam, ph, pd, pa) {
+  if (wcSavedPredIds.has(matchId)) return;
+  if (!sb) return;
+  const max = Math.max(ph, pd, pa);
+  const predicted = max === ph ? 'home' : max === pd ? 'draw' : 'away';
+  const {error} = await sb.from('model_predictions').upsert({
+    match_id: matchId, home_team: homeTeam, away_team: awayTeam,
+    home_flag: WC_FIXTURE[homeTeam]?.flag || '',
+    away_flag: WC_FIXTURE[awayTeam]?.flag || '',
+    home_prob: Math.round(ph * 10) / 10,
+    draw_prob: Math.round(pd * 10) / 10,
+    away_prob: Math.round(pa * 10) / 10,
+    predicted_winner: predicted
+  }, {onConflict: 'match_id', ignoreDuplicates: true});
+  if (!error) {
+    wcSavedPredIds.add(matchId);
+    localStorage.setItem('wc_saved_pred_ids', JSON.stringify([...wcSavedPredIds]));
+    if (!wcModelPredictions[matchId]) wcModelPredictions[matchId] = { match_id: matchId, home_team: homeTeam, away_team: awayTeam, home_prob: ph, draw_prob: pd, away_prob: pa, predicted_winner: predicted, home_flag: WC_FIXTURE[homeTeam]?.flag||'', away_flag: WC_FIXTURE[awayTeam]?.flag||'' };
+  }
+}
+
+async function wcLoadModelPredictions() {
+  if (!sb) return;
+  const {data} = await sb.from('model_predictions').select('*').order('created_at', {ascending: true});
+  wcModelPredictions = {};
+  (data||[]).forEach(p => { wcModelPredictions[p.match_id] = p; });
+}
+
+async function wcSetPredictionResult(matchId, actualWinner) {
+  const pred = wcModelPredictions[matchId];
+  if (!pred || pred.actual_winner) return; // already recorded
+  const correct = pred.predicted_winner === actualWinner;
+  wcModelPredictions[matchId] = { ...pred, actual_winner: actualWinner, correct };
+  if (!sb) return;
+  await sb.from('model_predictions').update({ actual_winner: actualWinner, correct }).eq('match_id', matchId);
+}
+
+async function wcRenderTrackRecord() {
+  const el = document.getElementById('trackrecord-container');
+  if (!el) return;
+  el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">Cargando predicciones...</div>';
+  await wcLoadModelPredictions();
+  const all = Object.values(wcModelPredictions);
+  const settled = all.filter(p => p.actual_winner != null);
+  const correct = settled.filter(p => p.correct);
+  const pct = settled.length ? Math.round(100 * correct.length / settled.length) : 0;
+  const pctColor = pct >= 65 ? '#4ade80' : pct >= 50 ? '#fb923c' : settled.length === 0 ? '#8899bb' : '#f87171';
+  const trend = pct >= 65 ? '🔥' : pct >= 50 ? '📈' : settled.length === 0 ? '⏳' : '📉';
+  el.innerHTML = `
+<div style="padding:20px 16px;max-width:640px;margin:0 auto">
+  <div style="margin-bottom:18px">
+    <div style="font-size:18px;font-weight:900;margin-bottom:3px">📈 Track Record del Modelo</div>
+    <div style="font-size:11px;color:var(--text3)">Predicciones guardadas automáticamente antes de cada partido · verificables en Supabase</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px">
+    <div style="background:var(--surface2);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid var(--border)">
+      <div style="font-size:24px;font-weight:900;color:${pctColor}">${pct}%</div>
+      <div style="font-size:8px;color:var(--text3);font-weight:700;margin-top:2px;letter-spacing:.5px">ACIERTO</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid var(--border)">
+      <div style="font-size:24px;font-weight:900;color:#4ade80">${correct.length}</div>
+      <div style="font-size:8px;color:var(--text3);font-weight:700;margin-top:2px;letter-spacing:.5px">CORRECTAS</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid var(--border)">
+      <div style="font-size:24px;font-weight:900;color:#f87171">${settled.length - correct.length}</div>
+      <div style="font-size:8px;color:var(--text3);font-weight:700;margin-top:2px;letter-spacing:.5px">FALLIDAS</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid var(--border)">
+      <div style="font-size:22px;font-weight:900">${trend}</div>
+      <div style="font-size:8px;color:var(--text3);font-weight:700;margin-top:2px;letter-spacing:.5px">${all.length - settled.length} PEND.</div>
+    </div>
+  </div>
+  ${_wcLeadCaptureHTML()}
+  <div style="margin-top:16px">
+    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px">Historial de predicciones</div>
+    ${all.length === 0
+      ? '<div style="text-align:center;color:var(--text3);padding:40px 0;font-size:13px;line-height:1.6">Las predicciones se guardan automáticamente<br>cuando se renderizan los partidos pendientes.<br><br>Abre la sección <b>Simular → Grupos</b> para activarlas.</div>'
+      : all.slice().reverse().map(p => _wcPredRow(p)).join('')}
+  </div>
+</div>`;
+}
+
+function _wcPredRow(p) {
+  const isPending = !p.actual_winner;
+  const sc = isPending ? '#8899bb' : p.correct ? '#4ade80' : '#f87171';
+  const icon = isPending ? '⏳' : p.correct ? '✅' : '❌';
+  const labels = { home: p.home_team, draw: 'Empate', away: p.away_team };
+  const predProb = p.predicted_winner === 'home' ? p.home_prob : p.predicted_winner === 'draw' ? p.draw_prob : p.away_prob;
+  return `<div style="background:var(--surface2);border-radius:11px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px;border-left:3px solid ${sc}">
+    <div style="font-size:18px;flex-shrink:0">${icon}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.home_flag||''} ${p.home_team} vs ${p.away_team} ${p.away_flag||''}</div>
+      <div style="font-size:9px;color:var(--text3);margin-top:2px">Pred: <span style="color:#374df5;font-weight:700">${labels[p.predicted_winner]||p.predicted_winner}</span> · ${Number(predProb).toFixed(1)}% confianza · ID: ${p.match_id}</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:10px;color:${sc};font-weight:800">${isPending ? 'PENDIENTE' : (p.correct ? 'CORRECTO' : 'FALLIDO')}</div>
+      ${!isPending ? `<div style="font-size:8px;color:var(--text3);margin-top:1px">Real: ${labels[p.actual_winner]||p.actual_winner}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ─── LEAD CAPTURE ─────────────────────────────────────────────────────────────
+let _wcLeadSaved = localStorage.getItem('wc_lead_saved');
+
+function _wcLeadCaptureHTML() {
+  if (_wcLeadSaved) return `<div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:10px;margin-bottom:4px"><div style="font-size:18px">✅</div><div style="font-size:11px;font-weight:700;color:#4ade80">¡Ya estás suscrito! Te llegaran los picks antes de cada partido.</div></div>`;
+  return `<div style="background:linear-gradient(135deg,rgba(55,77,245,.1),rgba(6,182,212,.06));border:1px solid rgba(55,77,245,.25);border-radius:12px;padding:16px;margin-bottom:4px">
+  <div style="font-size:13px;font-weight:900;margin-bottom:3px">🎯 Recibe los picks antes de cada partido</div>
+  <div style="font-size:11px;color:var(--text3);margin-bottom:12px">Gratis por Telegram o email — mismo modelo, pero antes de que empiece el partido</div>
+  <div style="display:flex;gap:8px">
+    <input id="wc-lead-input" type="text" placeholder="@tuusuario o tu@email.com" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:12px;font-family:inherit;outline:none;min-width:0">
+    <button onclick="wcSaveLead()" style="background:linear-gradient(135deg,#374df5,#2c3fd4);border:none;color:#fff;font-size:11px;font-weight:800;padding:10px 16px;border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Suscribir →</button>
+  </div>
+  <div id="wc-lead-status" style="font-size:10px;min-height:14px;margin-top:6px;color:var(--text3)"></div>
+</div>`;
+}
+
+async function wcSaveLead() {
+  const input = document.getElementById('wc-lead-input');
+  const status = document.getElementById('wc-lead-status');
+  const val = (input?.value || '').trim();
+  if (!val) { if (status) { status.textContent = '⚠️ Ingresá tu Telegram (@usuario) o email'; status.style.color = '#f87171'; } return; }
+  if (status) { status.textContent = 'Guardando...'; status.style.color = '#8899bb'; }
+  const type = val.includes('@') && !val.startsWith('@') ? 'email' : 'telegram';
+  if (sb) { await sb.from('leads').insert({ contact: val, type }); }
+  localStorage.setItem('wc_lead_saved', '1');
+  _wcLeadSaved = '1';
+  if (status) { status.textContent = '✅ ¡Listo! Te avisamos antes de cada partido.'; status.style.color = '#4ade80'; }
+  if (input) input.value = '';
+  setTimeout(() => wcRenderTrackRecord(), 1600);
 }
 
 // ─── QUINIELA OFFLINE ────────────────────────────────────────────────────────

@@ -12034,6 +12034,7 @@ function wcMcGol(p){
     '¡Abre un sobre del álbum! 📦✨',
   ];
   var CLICK_MSGS = [
+    '¡Yabba Dabba Duu! 🦴🎵',
     '¡Vamos campeones! 🏆',
     '¿Querés ver estadísticas? 📊',
     '¡Abrí tu sobre del álbum! 📦',
@@ -12042,6 +12043,7 @@ function wcMcGol(p){
     '¡Soy Zazu, tu asistente del Mundial! 🐆',
     '¿Ya hiciste tu quiniela? 🏅',
     '¡Simula y gana XP! ⚡',
+    '¡Yabba Dabba Duu! 🎶🏆',
   ];
   var TAB_MSGS = {
     0:'¡Grupos del Mundial! ¿Quién pasa? 🏟️',
@@ -12086,6 +12088,40 @@ function wcMcGol(p){
   function _goSoundPop()     { _goPlayTone(520, 'sine', 0.12, 0.10); }
   function _goSoundCelebrate(){ _goPlayTone(660,'sine',0.08,0.08); setTimeout(function(){_goPlayTone(880,'sine',0.12,0.10);},90); setTimeout(function(){_goPlayTone(1100,'sine',0.18,0.09);},200); }
   function _goSoundAlert()   { _goPlayTone(220,'sawtooth',0.18,0.08); }
+  function _goPlayFlintstones() {
+    var ctx = _goGetCtx(); if (!ctx) return;
+    // "Meet the Flintstones" + "Yabba Dabba Doo!" melody (F major)
+    var notes = [
+      // Meet the Flin-stones
+      [349.23,'triangle',0.00,0.11,0.14],
+      [349.23,'triangle',0.12,0.11,0.14],
+      [349.23,'triangle',0.24,0.11,0.14],
+      [466.16,'triangle',0.37,0.20,0.17],
+      [392.00,'triangle',0.59,0.11,0.14],
+      [349.23,'triangle',0.71,0.11,0.14],
+      [293.66,'triangle',0.84,0.20,0.14],
+      [233.08,'triangle',1.06,0.32,0.14],
+      // Ya-bba dab-ba DOO!
+      [349.23,'sine',    1.44,0.09,0.18],
+      [392.00,'sine',    1.54,0.09,0.18],
+      [466.16,'sine',    1.64,0.09,0.18],
+      [392.00,'sine',    1.75,0.09,0.18],
+      [349.23,'sine',    1.85,0.09,0.18],
+      [523.25,'sine',    1.96,0.38,0.22],  // DOO! (high C5)
+    ];
+    notes.forEach(function(n) {
+      try {
+        var osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = n[1];
+        osc.frequency.setValueAtTime(n[0], ctx.currentTime + n[2]);
+        gain.gain.setValueAtTime(n[4], ctx.currentTime + n[2]);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n[2] + n[3]);
+        osc.start(ctx.currentTime + n[2]);
+        osc.stop(ctx.currentTime + n[2] + n[3] + 0.02);
+      } catch(e){}
+    });
+  }
   function _goVibrate(pattern){ try { if(navigator.vibrate) navigator.vibrate(pattern); } catch(e){} }
 
   function GolazoMascot() {
@@ -12319,8 +12355,8 @@ function wcMcGol(p){
     this.char.addEventListener('click', function(e){
       if (self._minimized) return;
       self._ripple(e);
-      _goSoundPop();
-      _goVibrate([20]);
+      _goPlayFlintstones();
+      _goVibrate([20, 80, 20, 80, 20]);
       self._setState('click');
       // Check level upgrade on click
       setTimeout(function(){ self._updateLevel(); }, 300);
